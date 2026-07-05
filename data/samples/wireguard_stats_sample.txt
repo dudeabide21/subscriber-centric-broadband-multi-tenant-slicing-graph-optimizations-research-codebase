@@ -1,0 +1,3 @@
+# Synthetic sample output
+# evidence_class: Synthetic
+interface=wg0 peer_id_hash=peer-a rx_bytes=123456 tx_bytes=234567 latest_handshake=2026-07-03T08:00:05Z
