@@ -1,0 +1,4 @@
+# Synthetic sample log
+# evidence_class: Synthetic
+2026-07-03T08:00:00Z AUTH subscriber_id_hash=hash_a1 ap_id=ap-01 result=ACCEPT latency_ms=12.4
+2026-07-03T08:00:01Z AUTH subscriber_id_hash=hash_a2 ap_id=ap-01 result=REJECT latency_ms=7.8
