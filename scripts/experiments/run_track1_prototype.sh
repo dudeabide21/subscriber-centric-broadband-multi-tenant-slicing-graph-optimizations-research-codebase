@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${DRY_RUN:=1}"
+
+echo "Track 1 prototype runner placeholder. DRY_RUN=${DRY_RUN}"
