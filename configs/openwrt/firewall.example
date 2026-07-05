@@ -1,0 +1,4 @@
+config zone
+    option name 'lan'
+    option network 'lan'
+    option input 'ACCEPT'
