@@ -1,0 +1,4 @@
+# Synthetic sample output
+# evidence_class: Synthetic
+class htb 1:10 root rate 50Mbit ceil 100Mbit sent 123456 bytes 987 packets 12 drops backlog 0b 0p requeues 0
+class htb 1:20 root rate 25Mbit ceil 50Mbit sent 654321 bytes 111 packets 3 drops backlog 128b 4p requeues 0
