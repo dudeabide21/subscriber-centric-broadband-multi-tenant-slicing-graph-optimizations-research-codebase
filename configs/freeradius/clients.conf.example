@@ -1,0 +1,5 @@
+# Example only
+client ap-lab {
+    ipaddr = 192.0.2.10
+    secret = testing123
+}
