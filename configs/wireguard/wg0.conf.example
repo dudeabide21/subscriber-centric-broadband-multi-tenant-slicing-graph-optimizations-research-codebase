@@ -1,0 +1,4 @@
+[Interface]
+Address = 192.0.2.2/24
+ListenPort = 51820
+PrivateKey = REPLACE_ME
