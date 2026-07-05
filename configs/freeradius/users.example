@@ -1,0 +1,3 @@
+# Example only
+subscriber123 Cleartext-Password := "example-password"
+    Reply-Message := "Synthetic example user"
