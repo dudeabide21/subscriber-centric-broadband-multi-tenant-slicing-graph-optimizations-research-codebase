@@ -19,3 +19,5 @@ notebooks/.ipynb_checkpoints/
 *.egg-info/
 .coverage
 htmlcov/
+.venv-wsl/
+data/test_processed/
