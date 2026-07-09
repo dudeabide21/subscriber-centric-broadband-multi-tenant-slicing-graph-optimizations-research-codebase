@@ -1,24 +1,15 @@
 #!/usr/bin/env bash
+# scripts/setup/check_environment.sh
+# Thin wrapper — activates venv (if present) and delegates to the real
+# Python file so __file__, linting, and tracebacks all work correctly.
 set -euo pipefail
 
-python3 - <<'PY'
-from pathlib import Path
-import sys
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-root = Path(__file__).resolve().parents[2]
-required = [
-    root / "pyproject.toml",
-    root / "README.md",
-    root / "src" / "scb",
-    root / "src" / "scb" / "telemetry" / "sample_processing.py",
-    root / "tests",
-    root / "data" / "samples",
-]
-missing = [str(p) for p in required if not p.exists()]
-if missing:
-    print("Missing required paths:")
-    for item in missing:
-        print(f" - {item}")
-    sys.exit(1)
-print("Environment check passed: repository skeleton is present.")
-PY
+# Optional: activate a project venv if one exists
+if [ -f "${SCRIPT_DIR}/../../.venv/bin/activate" ]; then
+    # shellcheck disable=SC1091
+    source "${SCRIPT_DIR}/../../.venv/bin/activate"
+fi
+
+python3 "${SCRIPT_DIR}/check_environment.py"
