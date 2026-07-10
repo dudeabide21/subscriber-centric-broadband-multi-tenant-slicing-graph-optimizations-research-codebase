@@ -1,0 +1,606 @@
+%% ============================================================
+%%  Chapter 4 - Formal Mathematical Model
+%% ============================================================
+\chapter{Formal Mathematical Model}
+\label{ch:math}
+
+\section{System Variables}
+\label{sec:sysvars}
+
+Let $\mathcal{S}=\{s_1,\ldots,s_N\}$ denote subscribers and
+$\mathcal{A}=\{a_1,\ldots,a_M\}$ participating access points. Let
+$\mathcal{K}$ denote traffic slices, $\mathcal{D}$ administrative domains,
+and $\mathcal{H}$ available backhaul modes. Subscriber $s_i$ is represented by
+\begin{equation}
+  s_i=(id_i,d_i,p_i,b_i^{min},b_i^{max},\ell_i^{max},\delta_i^{max},\alpha_i,\rho_i),
+  \label{eq:subscriber-vector}
+\end{equation}
+where $id_i$ is pseudonymised identity, $d_i$ home domain, $p_i$ policy profile,
+$b_i^{min},b_i^{max}$ bandwidth bounds, $\ell_i^{max}$ latency bound,
+$\delta_i^{max}$ loss bound, $\alpha_i$ service class, and $\rho_i$ accounting
+identifier.
+
+AP $a_j$ is represented by
+\begin{equation}
+  a_j=(cap_j,bh_j,c_j,\eta_j,\phi_j,\omega_j,\Redge_j),
+  \label{eq:ap-vector}
+\end{equation}
+where $cap_j$ is wireless capacity, $bh_j$ effective backhaul capacity,
+$c_j$ channel, $\eta_j$ utilisation, $\phi_j$ local policy, $\omega_j$
+survivability state, and $\Redge_j$ edge resource vector.
+
+The assignment variables are
+\begin{equation}
+  x_{ij}=
+  \begin{cases}
+    1, & s_i\text{ is served by }a_j,\\
+    0, & \text{otherwise,}
+  \end{cases}
+  \qquad
+  z_{ik}=
+  \begin{cases}
+    1, & s_i\text{ is mapped to slice }k,\\
+    0, & \text{otherwise.}
+  \end{cases}
+  \label{eq:assignment-vars}
+\end{equation}
+
+A subscriber session is valid only if
+\begin{equation}
+  Valid(o_i)=1\Longleftrightarrow Auth_i=1\land Pol_i=1\land Iso_i=1\land Acct_i=1.
+  \label{eq:valid-session}
+\end{equation}
+
+\subsection{Notation, Parameter Selection, and Normalisation Convention}
+\label{sec:notation-parameter-policy}
+
+To avoid ambiguity between modelling variables, calibrated coefficients, and
+experimentally fixed thresholds, this section defines the notation and
+parameter-selection conventions used throughout the mathematical model and evaluation
+framework. Parameters are classified into four groups: operational policy parameters,
+measured quantities, calibrated coefficients, and pre-registered evaluation thresholds.
+
+\begin{table}[h]
+\centering
+\caption{Additional notation and parameter-selection conventions.}
+\label{tab:parameter_conventions}
+\begin{tabular}{p{0.18\linewidth} p{0.52\linewidth} p{0.22\linewidth}}
+\hline
+Symbol & Meaning & Selection method \\
+\hline
+$T_{\mathrm{rot}}$ &
+Nominal rotation period of the cached-token signing key $K_{\mathrm{net}}$. &
+Operational security policy. \\
+
+$T_{\mathrm{token}}$ &
+Maximum validity window of a cached offline-access token. &
+Chosen such that $T_{\mathrm{token}} < T_{\mathrm{rot}}$. \\
+
+$\Delta_{\min}$ &
+Minimum practically meaningful improvement in the composite evaluation score. &
+Fixed before comparative experiments. \\
+
+$B_{\mathrm{curr}}$ &
+Current measured available backhaul capacity during a telemetry epoch. &
+Measured from AP/gateway telemetry. \\
+
+$B_{\mathrm{nominal}}$ &
+Nominal expected backhaul capacity for the AP or scenario class. &
+Configured baseline or pilot-free engineering value. \\
+
+$\kappa_B$ &
+Sensitivity of telemetry interval to backhaul degradation. &
+Calibrated coefficient. \\
+
+$\kappa_{\mathrm{CPU}}$ &
+Sensitivity of telemetry interval to CPU pressure. &
+Calibrated coefficient. \\
+
+$\kappa_{\mathrm{RTT}}$ &
+Sensitivity of the LEO macro-epoch backoff to RTT variance. &
+Calibrated coefficient. \\
+
+$\kappa_{\mathrm{drop}}$ &
+Sensitivity of the LEO macro-epoch backoff to packet-drop rate. &
+Calibrated coefficient. \\
+\hline
+\end{tabular}
+\end{table}
+
+The cached-token key rotation parameter $T_{\mathrm{rot}}$ is treated as an
+operational security-policy parameter rather than a queueing or optimisation
+parameter. Cached-token validity is bounded by a shorter token lifetime
+$T_{\mathrm{token}}$, with
+\begin{equation}
+  T_{\mathrm{token}} < T_{\mathrm{rot}}.
+  \label{eq:token-rotation-bound}
+\end{equation}
+During local degraded operation, cached-token authentication is rejected when the
+locally held key age exceeds $2T_{\mathrm{rot}}$. This conservative bound prevents
+prolonged use of stale token-signing material while allowing short temporary service
+continuity during backhaul or AAA unavailability.
+
+The threshold $\Delta_{\min}$ in the acceptance criterion is fixed before comparative
+baseline experiments are performed. It represents the minimum practically meaningful
+improvement in the normalised composite score $S(M)$, not a value tuned after
+observing results. Unless otherwise justified by pilot-free engineering constraints, the
+default value is
+\begin{equation}
+  \Delta_{\min}=0.05.
+  \label{eq:delta-min-default}
+\end{equation}
+Sensitivity analysis will report whether the main conclusions change for
+\begin{equation}
+  \Delta_{\min}\in\{0.02,0.05,0.10\}.
+  \label{eq:delta-min-sensitivity}
+\end{equation}
+
+All convex weighted sums use non-negative weights normalised to one. Specifically,
+the graph-interference weights $\beta_r$, CMDP cost weights $\omega_r$, LEO cost
+weights $\psi_r$, and composite-score weights $\zeta_r$ satisfy
+\begin{align}
+  &\beta_r\geq0,\qquad \sum_r\beta_r=1, \label{eq:beta-normalisation}\\
+  &\omega_r\geq0,\qquad \sum_r\omega_r=1, \label{eq:omega-normalisation}\\
+  &\psi_r\geq0,\qquad \sum_r\psi_r=1, \label{eq:psi-normalisation}\\
+  &\zeta_r\geq0,\qquad \sum_r\zeta_r=1. \label{eq:zeta-normalisation}
+\end{align}
+These weights are fixed within a declared scenario class before comparative
+evaluation. They are not claimed to be globally transferable across dense urban,
+semi-urban, rural-extension, and mountain-backhaul-constrained scenarios without
+recalibration.
+
+The telemetry-throttle and LEO-backoff coefficients are treated differently from
+convex cost weights. The coefficients $\kappa_B$, $\kappa_{\mathrm{CPU}}$,
+$\kappa_{\mathrm{RTT}}$, and $\kappa_{\mathrm{drop}}$ are non-negative sensitivity
+parameters:
+\begin{equation}
+  \kappa_B\geq0,\qquad
+  \kappa_{\mathrm{CPU}}\geq0,\qquad
+  \kappa_{\mathrm{RTT}}\geq0,\qquad
+  \kappa_{\mathrm{drop}}\geq0.
+  \label{eq:kappa-nonnegative}
+\end{equation}
+They control how strongly telemetry sampling and LEO macro-epoch backoff react to
+backhaul degradation, CPU pressure, RTT variance, and packet-drop rate,
+respectively. They are calibrated through controlled sensitivity analysis and are not
+required to sum to one.
+
+\section{Finite Implementation Queue and Auxiliary LDT Queue}
+\label{sec:queue-split}
+
+The model separates the physical finite-buffer implementation queue from the auxiliary
+infinite-buffer queue used for large-deviation analysis. This avoids the contradiction of
+imposing a finite upper boundary $B_k$ while later evaluating $P(Q_k>B_k)$.
+
+\subsection{Finite Drop-Tail Implementation Model}
+\label{sec:finite-queue}
+
+For slice $k$, the implemented queue is a reflected/censored workload process
+$Q_k(t)\in[0,B_k]$. The service rate used in the queueing model is not the nominal
+configured traffic-control rate alone. Instead, the effective bottleneck service capacity
+is
+\begin{equation}
+  C_k^{eff}(t)=
+  \min\{C_k^{tc}(t),C_k^{air}(t),C_k^{cpu}(t),C_k^{tun}(t),C_k^{bh}(t)\},
+  \label{eq:effective-service}
+\end{equation}
+where $C_k^{tc}(t)$ is the configured traffic-control service rate,
+$C_k^{air}(t)$ is the airtime-limited wireless capacity, $C_k^{cpu}(t)$ is the
+CPU-limited forwarding capacity, $C_k^{tun}(t)$ is the tunnel-limited capacity after
+encapsulation or encryption overhead, and $C_k^{bh}(t)$ is the available backhaul
+capacity.
+
+The finite-buffer workload process is therefore modelled as
+\begin{equation}
+  dQ_k(t)=
+  \left(\lambda_k(t)-C_k^{eff}(t)\right)dt
+  +\sigma_k dW_t+dR_k^0(t)-dL_k^B(t),
+  \label{eq:finite-queue-sde}
+\end{equation}
+where $R_k^0(t)$ is the lower-bound reflection process at zero and $L_k^B(t)$ is the
+upper-bound loss/local-time process at buffer threshold $B_k$. Overflow in the
+implementation model is measured through the loss process $L_k^B(t)$, not through
+the impossible event $Q_k(t)>B_k$.
+
+The associated probability-flux expression for the unconstrained interior is
+\begin{equation}
+  J(q,t)=\mu_k(t)p(q,t)-\frac{\sigma_k^2}{2}\frac{\partial p(q,t)}{\partial q},
+  \qquad
+  \mu_k(t)=\lambda_k(t)-C_k^{eff}(t).
+  \label{eq:flux}
+\end{equation}
+At $q=0$, reflection imposes $J(0,t)=0$. At $q=B_k$, finite-buffer packet loss is
+recorded through the loss process rather than by claiming that the physical queue
+exceeds $B_k$. All queueing, effective-bandwidth, and SLA calculations use
+$C_k^{eff}(t)$, not the nominal configured traffic-control rate.
+
+\subsection{Diffusion Coefficient Estimation}
+\label{sec:diffusion}
+
+The diffusion coefficient must be a variance rate, not a raw telemetry-window variance.
+Let $A_k(t)$ denote cumulative input to slice $k$. For macro epoch $\tau$, define the
+quasi-static interval
+\begin{equation}
+  T_\tau=[\tau T_{GNN},(\tau+1)T_{GNN}).
+  \label{eq:macro-epoch}
+\end{equation}
+Within $T_\tau$, the empirical diffusion estimate is
+\begin{equation}
+  \hat{\sigma}_{k,\tau}^2
+  =
+  \frac{1}{\Delta}
+  \operatorname{Var}
+  \left[
+    A_k(t+\Delta)-A_k(t)-\hat{\lambda}_{k,\tau}\Delta
+  \right],
+  \qquad t,t+\Delta\in T_\tau,
+  \label{eq:diffusion-estimator}
+\end{equation}
+where $\Delta$ is the measurement interval and $\hat{\lambda}_{k,\tau}$ is the
+estimated mean input rate for slice $k$ during epoch $\tau$. This definition gives
+units of buffer-units squared per second and is compatible with the drift-diffusion
+approximation.
+
+The diffusion coefficient $\sigma_k$ in Eq.~\eqref{eq:finite-queue-sde} is interpreted
+at the macro-epoch scale. In implementation and empirical estimation, $\sigma_k^2$ is
+instantiated by the epoch-indexed estimator $\hat{\sigma}^{2}_{k,\tau}$ in
+Eq.~\eqref{eq:diffusion-estimator} under the quasi-static assumption that arrival and
+effective-service statistics remain approximately stationary within $T_\tau$.
+
+\section{Large Deviations Bound for the Auxiliary Infinite Queue}
+\label{sec:ldt}
+
+Large Deviations Theory is applied to an auxiliary infinite-buffer workload
+$Q_k^{\infty}(t)$, not to the finite implementation queue. The virtual tail probability
+\begin{equation}
+  P(Q_k^{\infty}>B_k)
+  \label{eq:virtual-tail-probability}
+\end{equation}
+approximates the overflow risk that the finite queue would experience at threshold
+$B_k$.
+
+Let $A_k(t)$ be the cumulative input process. Its effective bandwidth is
+\begin{equation}
+  E_k(\theta)
+  =
+  \lim_{t\to\infty}
+  \frac{1}{\theta t}
+  \log\mathbb{E}\left[e^{\theta A_k(t)}\right],
+  \qquad \theta>0.
+  \label{eq:eff-bw-def}
+\end{equation}
+The stability condition is $E_k(0^+)<C_k^{eff}$, where $E_k(0^+)$ is the mean input
+rate when the limit exists. The decay exponent is defined safely as
+\begin{equation}
+  \theta_k^*
+  =
+  \sup\{\theta>0:E_k(\theta)<C_k^{eff}\}.
+  \label{eq:sup-root}
+\end{equation}
+If $E_k(\theta)$ is continuous, strictly increasing, and crosses $C_k^{eff}$, then the
+supremum is the unique positive solution of
+\begin{equation}
+  E_k(\theta_k^*)=C_k^{eff}.
+  \label{eq:root-conditional}
+\end{equation}
+Otherwise, the analysis reports the supremum-based bound rather than assuming root
+existence.
+
+Under the effective-bandwidth assumptions, the auxiliary workload satisfies the
+logarithmic asymptotic relation
+\begin{equation}
+  \lim_{B_k\to\infty}
+  \frac{1}{B_k}
+  \log P(Q_k^{\infty}>B_k)
+  =
+  -\theta_k^*.
+  \label{eq:ldt-asymptotic}
+\end{equation}
+For finite $B_k$, the quantity $e^{-\theta_k^*B_k}$ is used only as an
+exponential-order overflow-risk indicator, not as a calibrated finite-buffer loss
+probability unless validated against measured queue-loss traces.
+
+This bound estimates overflow risk only. Cross-slice isolation is not a consequence of
+large-deviation theory; it is enforced by VLAN/VNI separation, queue-discipline
+configuration, and verified packet tracing in the edge datapath.
+
+\section{Hard Safety Feasibility and State-Dependent Safe Actions}
+\label{sec:pisafe}
+
+\begin{definition}[State-dependent safe action set]
+For a state $x\in\mathcal{X}$, the safe action set is
+\begin{equation}
+  \Usafe(x)=
+  \{u\in\mathcal{U}(x):
+  Auth(x,u)=1,\;
+  Pol(x,u)=1,\;
+  Iso(x,u)=1,\;
+  Acct(x,u)=1,\;
+  EdgeFeas(x,u)=1\}.
+  \label{eq:usafe-state}
+\end{equation}
+\end{definition}
+
+The edge-feasibility predicate is
+\begin{equation}
+\begin{aligned}
+  EdgeFeas(x,u)=1
+  \Longleftrightarrow\;&
+  CPU_j\leq CPU_j^{max}
+  \land RAM_j\leq RAM_j^{max}
+  \land IRQ_j\leq IRQ_j^{max} \\
+  &\land \Omega_j\leq\Omega_j^{max}
+  \land C_k^{eff}>E_k(0^+).
+\end{aligned}
+\label{eq:edge-feasibility}
+\end{equation}
+The final condition ensures that the effective service capacity of the selected slice
+exceeds the mean input rate implied by the effective-bandwidth model. Thus, a safe
+action is not merely authenticated and policy-valid; it must also be feasible under
+measured edge-resource and queue-stability constraints.
+
+\begin{definition}[Safe policy set]
+A policy is safe if it chooses only safe actions in every reachable state:
+\begin{equation}
+  \Pisafe=
+  \{\pi:\pi(x)\in\Usafe(x),\;\forall x\in\mathcal{X}\}.
+  \label{eq:pisafe-corrected}
+\end{equation}
+\end{definition}
+
+Basic access constraints are
+\begin{align}
+  &\sum_{j=1}^M x_{ij}\leq1, &&\forall i,
+  \label{eq:single-ap}\\
+  &x_{ij}\leq Auth_i, &&\forall i,j,
+  \label{eq:auth-req}\\
+  &z_{ik}\leq Pol_{ik}, &&\forall i,k.
+  \label{eq:policy-req}
+\end{align}
+Capacity and QoS constraints are
+\begin{align}
+  &\sum_{i=1}^{N}x_{ij}b_i\leq \min(cap_j,bh_j), &&\forall j,
+  \label{eq:capacity}\\
+  &b_i^{min}\leq b_i\leq b_i^{max},\quad
+  \ell_i\leq\ell_i^{max},\quad
+  \delta_i\leq\delta_i^{max}.
+  \label{eq:qos}
+\end{align}
+Edge feasibility follows Eq.~\eqref{eq:edge-feasibility}.
+
+\section{Interference Graph and Edge-Aware Attention}
+\label{sec:interference-graph}
+
+The graph state is
+\begin{equation}
+  G_t=(V_t,E_t,X_t,E_t^{feat}),
+  \label{eq:edge-feature-graph}
+\end{equation}
+where $X_t$ stores node features and $E_t^{feat}$ stores edge features, including
+interference weight, distance proxy, channel overlap, and utilisation coupling. The
+AP-AP interference edge weight is
+\begin{equation}
+  w_{jl}(t)
+  =
+  \beta_1\mathbbm{1}[c_j=c_l]
+  +\beta_2\frac{1}{(d_{jl}+\epsilon_d)^{\hat{\gamma}}}
+  +\beta_3(\eta_j+\eta_l)
+  +\beta_4O_{jl},
+  \label{eq:edge-weight}
+\end{equation}
+with normalised terms, $\beta_r\geq0$, and $\sum_r\beta_r=1$.
+
+Each scalar edge feature is min--max normalised within the scenario class before
+training:
+\begin{equation}
+  \bar{x}_{r,jl}
+  =
+  \frac{x_{r,jl}-\min_{(u,v)\in E}x_{r,uv}}
+  {\max_{(u,v)\in E}x_{r,uv}-\min_{(u,v)\in E}x_{r,uv}+\epsilon}.
+  \label{eq:edge-feature-normalisation}
+\end{equation}
+The calibrated or learned coefficients $\beta_r$ are therefore comparable only within
+a declared scenario class. They are not claimed to be globally transferable without
+re-normalisation or recalibration.
+
+The attention mechanism is edge-aware:
+\begin{equation}
+  \alpha_{uv}^{(l)}
+  =
+  \softmax_{u}
+  \left(
+  \operatorname{LeakyReLU}
+  \left(
+  \mathbf{a}^{(l)\top}
+  \left[
+  W^{(l)}h_v^{(l)}
+  \Vert
+  W^{(l)}h_u^{(l)}
+  \Vert
+  e_{uv}^{(l)}
+  \right]
+  \right)
+  \right),
+  \label{eq:edge-aware-attention}
+\end{equation}
+where $e_{uv}^{(l)}$ is the edge-feature vector. This corrects the earlier ambiguity
+of hiding interference weights inside node features.
+
+\section{Physics-Informed Path-Loss Scope}
+\label{sec:pinn}
+
+Indoor Wi-Fi is modelled with a log-distance multi-wall model:
+\begin{equation}
+  PL(d)
+  =
+  PL_0
+  +10\hat{\gamma}\log_{10}\left(\frac{d}{d_0}\right)
+  +\sum_{m=1}^{M_w}N_{w,m}L_{w,m}.
+  \label{eq:multiwall}
+\end{equation}
+This model is validated against floor-plan/RSSI heatmap data, not terrain grid data.
+The empirical acceptance target is $RMSE_{RSSI}\leq4$--$6\,\mathrm{dB}$ unless
+stronger measurement evidence justifies a tighter bound.
+
+For LEO or long-range rural backhaul, the physics-informed loss may use ITU-R
+P.838/P.618 rain and earth-space propagation constraints~\cite{itu-p838,itu-p618}:
+\begin{equation}
+  \mathcal{L}_{PINN}
+  =
+  \mathcal{L}_{data}
+  +\lambda_{phys}\mathcal{L}_{phys},
+  \qquad
+  \mathcal{L}_{phys}
+  =
+  \frac{1}{Q}
+  \sum_{q=1}^{Q}
+  (\hat{y}_q-y_{phys,q})^2.
+  \label{eq:pinn-loss}
+\end{equation}
+Applying ITU-R rain attenuation to ordinary indoor Wi-Fi would be outside this
+proposal's valid scope.
+
+\section{Consistent Cost-Minimisation CMDP}
+\label{sec:cmdp}
+
+The slow controller is formulated as a cost-minimising CMDP:
+\begin{equation}
+  \mathcal{M}
+  =
+  (\mathcal{X},\Usafe(\cdot),P,C,\gamma),
+  \qquad
+  \gamma\in(0,1).
+  \label{eq:cmdp}
+\end{equation}
+The state $x$ is a high-dimensional graph-embedding and telemetry summary, so the
+Bellman equation is written with an expectation rather than a discrete summation:
+\begin{equation}
+  V^*(x)
+  =
+  \min_{u\in\Usafe(x)}
+  \left[
+  C(x,u)
+  +\gamma
+  \mathbb{E}_{x'\sim P(\cdot|x,u)}
+  V^*(x')
+  \right].
+  \label{eq:bellman-corrected}
+\end{equation}
+
+If $\Usafe(x)=\emptyset$, the minimisation in Eq.~\eqref{eq:bellman-corrected}
+is not evaluated over an empty action set. Instead, the controller invokes the
+deterministic survivability fallback associated with the AP state $\omega_j$. In the
+Online state, new admissions are rejected while existing valid sessions are preserved
+only if they remain feasible. In the Degraded state, only previously authorised
+subscribers with valid cached tokens may receive capped service and signed offline
+accounting. In the Isolated state, no subscriber privilege escalation is permitted; the
+AP either denies subscriber service or applies an explicitly configured guest-degraded
+local policy.
+
+The instantaneous cost is defined as
+\begin{equation}
+  C(x,u)
+  =
+  \omega_1\mathcal{I}(G)
+  +\omega_2V_{SLA}
+  +\omega_3O_{tun}
+  +\omega_4O_{edge}
+  +\omega_5O_{LEO}
+  -\omega_6T_{norm}
+  -\omega_7J(\tilde{\mathbf{b}}).
+  \label{eq:cost-function}
+\end{equation}
+Here $T_{norm}$ is normalised delivered throughput. Latency, loss, and minimum-rate
+violations are not separately embedded inside $T_{norm}$ because they are already
+represented through $V_{SLA}$. This prevents the cost function from double-counting
+the same service degradation through both utility and SLA-violation terms.
+
+\begin{table}[H]
+\centering
+\caption{Operational definitions of CMDP cost terms.}
+\label{tab:cmdp-cost-terms}
+\begin{tabularx}{\textwidth}{p{0.16\linewidth}X p{0.24\linewidth}}
+\toprule
+\textbf{Term} & \textbf{Operational definition} & \textbf{Evidence source} \\
+\midrule
+$\mathcal{I}(G)$ & Normalised graph-interference cost computed from active AP--AP interference edge weights. & Radio-topology matrix. \\
+$V_{SLA}$ & Fraction of subscriber-epochs violating latency, loss, or minimum-rate SLA bounds. & Slice-performance matrix. \\
+$O_{tun}$ & Tunnel overhead ratio $(Bytes_{tunnel}-Bytes_{payload})/(Bytes_{payload}+\epsilon)$. & Slice-performance and gateway counters. \\
+$O_{edge}$ & Normalised edge-resource pressure over CPU, RAM, IRQ, crypto, queueing, and telemetry load. & Edge-resource matrix. \\
+$O_{LEO}$ & Normalised backhaul penalty for LEO path RTT, jitter, outage, handover, and power cost. & Backhaul-resilience matrix. \\
+$T_{norm}$ & Delivered throughput normalised by subscriber entitlement or configured maximum. & Slice-performance matrix. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+If a PPO-style implementation requires a reward signal, it is defined only as
+\begin{equation}
+  R(x,u)=-C(x,u).
+  \label{eq:reward-negative-cost}
+\end{equation}
+This removes the earlier reward/cost sign-convention mismatch.
+
+Because the state is represented by continuous telemetry and graph embeddings, any
+PPO-style implementation uses function approximation. Therefore, tabular CMDP
+convergence guarantees do not directly apply. Safety is enforced by the
+state-dependent safe action filter rather than learned solely from reward penalties.
+
+Fairness is measured using Jain's index over normalised subscriber entitlement:
+\begin{equation}
+  J(\tilde{\mathbf{b}})
+  =
+  \frac{
+  \left(\sum_{i=1}^{N}\tilde{b}_i\right)^2
+  }
+  {
+  N\sum_{i=1}^{N}\tilde{b}_i^2
+  },
+  \qquad
+  \tilde{b}_i=\frac{b_i}{b_i^{max}}.
+  \label{eq:jain}
+\end{equation}
+
+\section{LEO Backhaul Resilience Cost}
+\label{sec:leo-model}
+
+For backhaul mode $h$, effective capacity is
+\begin{equation}
+  bh_{j,t}^{eff}=A_{j,t}^{h}C_{j,t}^{h},
+  \label{eq:bh-eff}
+\end{equation}
+where $A_{j,t}^{h}\in\{0,1\}$ is path availability and $C_{j,t}^{h}$ is usable
+capacity.
+
+For a LEO path, the cost uses normalised dimensionless terms:
+\begin{equation}
+  C_{LEO,j,t}^{cost}
+  =
+  \psi_1\frac{RTT_{j,t}}{RTT_{ref}}
+  +\psi_2\frac{Jit_{j,t}}{Jit_{ref}}
+  +\psi_3P_{out,j,t}
+  +\psi_4Handover_{j,t}
+  +\psi_5EnergyCost_{j,t}.
+  \label{eq:leo-cost}
+\end{equation}
+The energy-cost term is defined as
+\begin{equation}
+  EnergyCost_{j,t}
+  =
+  1-\frac{PwrAvail_{j,t}}{PwrMax_j+\epsilon}.
+  \label{eq:energy-cost}
+\end{equation}
+Thus, lower available terminal power increases the LEO cost. This prevents the
+backhaul selector from accidentally treating high battery or power availability as a
+penalty.
+
+The selector chooses
+\begin{equation}
+  h^*_{j,t}
+  =
+  \argmin_{h\in\mathcal{H}}
+  C_{h,j,t}^{cost}
+  \quad
+  \text{subject to }
+  \pi\in\Pisafe.
+  \label{eq:bh-selector}
+\end{equation}
