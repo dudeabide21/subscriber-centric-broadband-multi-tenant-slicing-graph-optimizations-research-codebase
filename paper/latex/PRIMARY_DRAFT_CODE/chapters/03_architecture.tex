@@ -1,0 +1,171 @@
+%% ============================================================
+%%  Chapter 3 - System Architecture
+%% ============================================================
+\chapter{System Architecture}
+\label{ch:arch}
+
+\section{Architectural Boundary Conditions}
+\label{sec:boundary}
+
+The architecture is bounded by six deployment constraints:
+\begin{enumerate}
+  \item Every participating AP must be administratively enrolled.
+  \item Subscriber identity must be stronger than a shared Wi-Fi password; certificate-based or profile-based \eap{} is the minimum proposed mechanism.
+  \item The home domain remains the authoritative source of subscriber policy.
+  \item Authentication, policy compliance, slice isolation, accounting consistency, and edge-resource feasibility are hard feasibility requirements.
+  \item Commodity edge APs are treated as constrained compute platforms.
+  \item Machine learning operates only in the slow control path and cannot override local safety rules.
+\end{enumerate}
+
+\section{Clean Four-Plane Architecture}
+\label{sec:clean-architecture}
+
+The architecture is organised into four planes: trust and policy, fast edge enforcement, backhaul and gateway selection, and telemetry/optimisation/survivability. Figure~\ref{fig:architecture-clean} presents the simplified structure used throughout the rest of the proposal.
+
+\input{figures/architecture_clean}
+
+\paragraph{Trust and policy plane.} Handles federated AAA, \radsec{} transport, home-policy lookup, access decisions, and accounting identity initialisation.
+
+\paragraph{Fast edge enforcement plane.} Executes packet forwarding, VLAN/VXLAN separation, Linux \texttt{tc}/\htb{}/\fqcodel{} shaping, local overload protection, and isolation checks.
+
+\paragraph{Backhaul and gateway plane.} Selects terrestrial or optional LEO backhaul paths after authentication and slice assignment have succeeded.
+
+\paragraph{Telemetry, optimisation, and survivability plane.} Aggregates telemetry into graph states, performs slow macro-policy optimisation, and supports token-cache degraded mode during local isolation.
+
+\section{Fast Path, Slow Path, and Control Epochs}
+\label{sec:timescales}
+
+The two-timescale model prevents the GNN controller from chasing millisecond-scale packet bursts. The local AP and edge gateway enforce existing rules at fast timescales, while the GNN updates macro policies only after telemetry aggregation.
+
+\begin{equation}
+  \Tfast \ll \TGNN, \qquad t_{\mathrm{infer}} \leq 150\,\mathrm{ms} \ll \TGNN.
+  \label{eq:timescale-sep}
+\end{equation}
+
+\begin{table}[H]
+  \centering
+  \caption{Control-plane split and temporal responsibilities.}
+  \label{tab:control-split}
+  \begin{tabularx}{\textwidth}{lllX}
+    \toprule
+    \textbf{Layer} & \textbf{Location} & \textbf{Timescale} & \textbf{Responsibility} \\
+    \midrule
+    Fast path & Edge AP/gateway & $1$--$100\,\mathrm{ms}$ & Enforce slice rules, queue shaping, VLAN/tunnel isolation, overload protection. \\
+    Local guard & Edge AP/gateway & $100\,\mathrm{ms}$--$1\,\mathrm{s}$ & Apply deterministic fallback under overload, queue instability, or backhaul loss. \\
+    GNN control & Regional controller & $10$--$60\,\mathrm{s}$ & Update association preferences, channel plans, slice weights, and backhaul policy. \\
+    Offline trainer & Research server & Hours--days & Train and validate graph models from telemetry and simulation traces. \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Commodity Edge Resource Budget}
+\label{sec:edge-budget}
+
+Each edge AP is modelled as a constrained compute platform with resource vector
+\begin{equation}
+  \Redge_j=(CPU_j,RAM_j,IRQ_j,Crypto_j,Encaps_j,Queue_j,Tel_j).
+  \label{eq:resource-vector}
+\end{equation}
+
+The feasibility constraint is
+\begin{equation}
+  CPU_j\leq CPU_j^{\max},\quad RAM_j\leq RAM_j^{\max},\quad IRQ_j\leq IRQ_j^{\max},\quad \forall j.
+  \label{eq:edge-resource-ceiling}
+\end{equation}
+
+The operational acceptance target is $CPU_j\leq0.75CPU_j^{\max}$ under peak traffic, leaving headroom for control-plane tasks. This target is an empirical acceptance criterion, not a theoretical guarantee.
+
+\subsection{Driver Buffer Admission Heuristic}
+\label{sec:ring-buffer}
+
+The driver-ring control is an empirical admission-control heuristic, not a stability theorem. Let $\Lambda_{k,j}$ be the measured normalised frame load of slice $k$ on AP $a_j$. The admission condition is
+\begin{equation}
+  \Omega_j=\sum_{k\in\mathcal{K}}\Lambda_{k,j}
+  \leq
+  \Omega_j^{\max}
+  \left[1-\xi\frac{Drop_{driver,j}}{Arrival_j+\epsilon}\right]_+,
+  \label{eq:ring-buffer}
+\end{equation}
+where $[x]_+=\max(0,x)$, $\epsilon>0$ prevents division by zero, and $\xi$ is selected through hardware calibration. This prevents the earlier draft from asserting an unproven universal ring-buffer stability condition.
+
+\section{Edge Survivability Under Local Isolation}
+\label{sec:survivability}
+
+Nepal-specific power cuts, fibre disruptions, and intermittent backhaul motivate a three-state survivability model:
+\begin{equation}
+  \omega_j\in\{\mathrm{Online},\mathrm{Degraded},\mathrm{Isolated}\}.
+\end{equation}
+
+In \emph{Online} mode, all authentication and accounting flows use the normal AAA/RadSec path. In \emph{Degraded} mode, previously authorised subscribers may use short-lived cached tokens with strict bandwidth caps and signed offline accounting. In \emph{Isolated} mode, no privilege escalation is possible; the AP provides either no subscriber service or limited guest-degraded service according to local policy.
+
+A cached token is
+\begin{equation}
+  \tau_i=\hmaclabel{}_{\Knet}(ID_i\|TS_i\|SLA_i),
+  \label{eq:hmac-token}
+\end{equation}
+with anti-replay timestamp $TS_i$, service entitlement bitmap $SLA_i$, and key $\Knet{}$ provisioned before failure. The CPU target for re-authentication storms is treated as an empirical acceptance criterion:
+\begin{equation}
+  CPU_{auth,j}\leq0.05CPU_j^{\max}
+  \quad \text{during a 100-client cached-token re-authentication test.}
+  \label{eq:hmac-cpu-criterion}
+\end{equation}
+
+\section{Normalised LEO Control Backoff}
+\label{sec:leo-backoff}
+
+The clipping operator is defined as
+
+\begin{equation}
+\operatorname{clip}_{[a,b]}(x)
+=
+\min\{b,\max\{a,x\}\}.
+\label{eq:clip-definition}
+\end{equation}
+
+The LEO-specific macro-epoch backoff uses dimensionless inputs:
+
+\begin{equation}
+\Delta t_{\mathrm{eff}}^{\mathrm{LEO}}
+=
+\operatorname{clip}_{[\Delta t_{\mathrm{macro}},\Delta t_{\max}]}
+\left(
+\Delta t_{\mathrm{macro}}
+\exp
+\left[
+\kappa_{\mathrm{RTT}}
+\frac{\sigma^2_{\mathrm{RTT}}}{\sigma^2_{\mathrm{RTT,ref}}+\epsilon}
++
+\kappa_{\mathrm{drop}}
+\frac{Drop_{\mathrm{LEO}}}{Drop_{\mathrm{ref}}+\epsilon}
+\right]
+\right).
+\label{eq:leo-backoff-clean}
+\end{equation}
+
+The clipping operation prevents exponential blow-up, while normalisation
+prevents dimensional inconsistency inside the exponential. The coefficients
+$\kappa_{\mathrm{RTT}}\geq0$ and $\kappa_{\mathrm{drop}}\geq0$ are LEO-backoff
+sensitivity parameters. They are not LEO cost weights and are therefore not
+constrained to sum to one.
+
+\section{Systems Verification Matrix}
+\label{sec:verification}
+
+\begin{table}[H]
+  \centering
+  \caption{Systems verification and boundary performance matrix.}
+  \label{tab:verification}
+  \begin{tabularx}{\textwidth}{llX}
+    \toprule
+    \textbf{Element} & \textbf{Environment} & \textbf{Acceptance Target} \\
+    \midrule
+    Slice isolation & Emulation + prototype & Zero cross-slice packets matching foreign VLAN/VNI tags. \\
+    Edge compute ceiling & Hardware benchmark & $CPU_j\leq0.75CPU_j^{\max}$ under peak configured workload. \\
+    Auth-storm resistance & Hardware benchmark & $CPU_{auth,j}\leq0.05CPU_j^{\max}$ as empirical target, not guarantee. \\
+    GNN inference & Trace simulation & $t_{infer}\leq150\,\mathrm{ms}$ and $t_{infer}\ll \TGNN$. \\
+    Wi-Fi path-loss model & RSSI survey & RMSE target $4$--$6\,\mathrm{dB}$ against floor-plan/RSSI heatmap data. \\
+    LEO model & Backhaul tests/simulation & LEO results reported separately from terrestrial-only baseline. \\
+    Accounting consistency & Prototype + emulation & $|Bytes_{RADIUS}-Bytes_{GW}|\leq\varepsilon_{acct}$. \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
