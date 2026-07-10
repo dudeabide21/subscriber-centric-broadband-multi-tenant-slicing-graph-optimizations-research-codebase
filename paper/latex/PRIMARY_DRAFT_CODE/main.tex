@@ -1,0 +1,36 @@
+%% ============================================================
+%%  Modular Q1 Proposal Source
+%%  Safety-Constrained Subscriber-Centric Broadband Infrastructure
+%%  Build with: pdflatex main.tex && pdflatex main.tex
+%% ============================================================
+\documentclass[12pt,a4paper]{report}
+
+\input{config/preamble}
+\input{config/macros}
+
+\begin{document}
+
+\input{frontmatter/titlepage}
+
+\pagenumbering{roman}
+\tableofcontents
+\listoftables
+\listoffigures
+\newpage
+
+\input{frontmatter/abstract}
+
+\clearpage
+\pagenumbering{arabic}
+
+\input{chapters/01_introduction}
+\input{chapters/02_literature}
+\input{chapters/03_architecture}
+\input{chapters/04_formal_model}
+\input{chapters/05_methodology}
+\input{chapters/06_implementation}
+\input{chapters/07_outcomes}
+
+\input{backmatter/references}
+
+\end{document}

@@ -1,0 +1,72 @@
+%% ============================================================
+%%  Chapter 2 - Literature Review and Theoretical Framework
+%% ============================================================
+\chapter{Literature Review and Theoretical Framework}
+\label{ch:litreview}
+
+\section{Federated Authentication and Subscriber Identity}
+\label{sec:lit-aaa}
+
+Network access control relies on Authentication, Authorisation, and Accounting mechanisms. \radius{} remains foundational; \radsec{} secures \radius{} over TLS for inter-domain federation~\cite{rfc6614}. IEEE 802.1X defines port-based network access control~\cite{ieee8021x}, while \eap{}-TLS provides certificate-based mutual authentication~\cite{rfc9190}. The Network Access Identifier supports realm-based identity routing~\cite{rfc7542}, and eduroam shows that federated roaming can operate at global scale~\cite{rfc7593}.
+
+These systems establish identity-based access but do not solve the whole subscriber-centric broadband problem. Authentication identifies the user, but does not by itself map broadband packages to shared AP slices, enforce traffic isolation, optimise radio resources, or maintain accounting consistency across constrained visited access points.
+
+\section{Wi-Fi Roaming, Hotspots, and Shared Access}
+\label{sec:lit-wifi}
+
+Passpoint and OpenRoaming demonstrate automated profile-based Wi-Fi access and federation~\cite{passpoint2024,wba-openroaming}. Public hotspots and captive portals improve convenience but weaken cryptographic identity, per-user QoS, and accounting. Community networks show infrastructure sharing but usually lack standardised subscriber-policy enforcement and regulatory traceability.
+
+The proposed system treats shared broadband as a multi-plane systems problem: identity federation, policy resolution, edge slicing, telemetry, accounting, and slow-timescale optimisation are evaluated as one reproducible architecture.
+
+\section{Edge Slicing and Secure Overlay Transport}
+\label{sec:lit-slicing}
+
+Tenant separation can be implemented using VLANs, traffic-control queues, overlays, and programmable datapaths. VXLAN supports layer-2 overlays over layer-3 networks~\cite{rfc7348}. WireGuard provides lightweight encrypted tunnelling~\cite{wireguard2017}. Linux \texttt{tc}, \htb{}, and \fqcodel{} provide practical per-subscriber shaping on commodity Linux-based devices~\cite{openwrt2024}. eBPF/XDP can support packet classification and telemetry on capable hardware~\cite{hoiland2018xdp}, but it is not assumed to be feasible on all low-end APs.
+
+\section{LEO Backhaul and Rural Resilience}
+\label{sec:lit-leo}
+
+LEO satellite systems are relevant where terrestrial backhaul is unavailable or unstable. Measurement studies of Starlink-class systems show that LEO performance depends on routing, ground infrastructure, satellite handovers, terminal power, and weather-sensitive link availability~\cite{mohan2023starlink,ullah2025starlink,wu2024handover}. The architecture therefore treats LEO as an optional resilience path, not as a core dependency. LEO selection cannot bypass identity, policy, isolation, or accounting.
+
+\section{Graph Learning and Wireless Resource Allocation}
+\label{sec:lit-gnn}
+
+Shared Wi-Fi access is naturally graph-structured. APs interfere, subscribers associate, channels overlap, and mobility changes edge weights over time. GCN and GAT architectures provide learning mechanisms for graph-structured data~\cite{kipf2017gcn,velickovic2018gat}. GNN-based radio resource management has direct precedent in wireless systems research~\cite{shen2021gnn}. This proposal, however, restricts graph learning to slow macro-policy optimisation and never allows it to override fast local safety enforcement.
+
+\section{Theoretical Framework}
+\label{sec:theory}
+
+The theoretical framework integrates four traditions: network access control, queueing and effective-bandwidth theory, graph learning, and safe constrained control. The revised proposal avoids treating queueing approximations, large-deviation bounds, and neural-network optimisation as interchangeable. Each is assigned a specific role:
+
+\begin{enumerate}
+  \item AAA and 802.1X define subscriber identity and policy authority.
+  \item Finite-queue models describe implementation behaviour; auxiliary infinite-buffer models support large-deviation overflow estimation.
+  \item GNNs update slow macro policies from graph telemetry.
+  \item State-dependent CMDP safe action sets ensure that learning-based decisions never bypass authentication, policy, isolation, accounting, or resource feasibility.
+\end{enumerate}
+
+The system chain is:
+
+\vspace{0.75em}
+\begin{equation}
+  \begin{array}{c}
+    \boxed{\text{Subscriber Identity}} \\
+    \downarrow \\[-0.2ex]
+    \scriptstyle{\text{federated auth}} \\[0.6ex]
+    \downarrow \\[-0.2ex]
+    \boxed{\text{Policy Resolution}} \\
+    \downarrow \\[-0.2ex]
+    \scriptstyle{\text{slice mapping}} \\[0.6ex]
+    \downarrow \\[-0.2ex]
+    \boxed{\text{Edge Enforcement}} \\
+    \downarrow \\[-0.2ex]
+    \scriptstyle{\text{telemetry}} \\[0.6ex]
+    \downarrow \\[-0.2ex]
+    \boxed{\text{Slow Optimisation}} \\
+    \downarrow \\[-0.2ex]
+    \scriptstyle{\text{audit}} \\[0.6ex]
+    \downarrow \\[-0.2ex]
+    \boxed{\text{Accounting}}
+  \end{array}
+  \label{eq:theory-chain}
+\end{equation}

@@ -1,0 +1,71 @@
+%% ============================================================
+%%  Preamble
+%% ============================================================
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=3.0cm,right=2.5cm]{geometry}
+
+%% Mathematics
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bm}
+\usepackage{bbm}
+
+%% Algorithms
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\SetKwComment{Comment}{/* }{ */}
+\SetKwInput{KwData}{Input}
+\SetKwInput{KwResult}{Output}
+
+%% Tables
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{makecell}
+
+%% Figures and color
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,shapes.geometric}
+\definecolor{deepblue}{RGB}{0,51,102}
+\definecolor{softblue}{RGB}{231,241,252}
+\definecolor{softgreen}{RGB}{234,247,238}
+\definecolor{softorange}{RGB}{255,244,230}
+\definecolor{softgray}{RGB}{244,244,244}
+\definecolor{midgray}{RGB}{90,90,90}
+
+%% Captions
+\usepackage[font=small,labelfont=bf]{caption}
+
+%% Line spacing
+\usepackage{setspace}
+\onehalfspacing
+
+%% Bibliography style helpers
+\usepackage[numbers,sort&compress]{natbib}
+
+%% Headers / footers
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{Subscriber-Centric Broadband - Research Proposal}}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14pt}
+
+%% Hyperlinks must be late
+\usepackage[colorlinks=true,linkcolor=deepblue,citecolor=deepblue,urlcolor=deepblue,bookmarksnumbered=true]{hyperref}
+
+%% Theorem environments
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[chapter]

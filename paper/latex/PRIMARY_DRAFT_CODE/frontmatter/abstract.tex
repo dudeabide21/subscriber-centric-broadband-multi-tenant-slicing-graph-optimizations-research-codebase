@@ -1,0 +1,19 @@
+%% ============================================================
+%%  Abstract
+%% ============================================================
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\thispagestyle{fancy}
+
+Fixed broadband access in most emerging economies remains organised around a router-centric model in which a subscriber line, optical network terminal, and private Wi-Fi router define the practical boundary of internet service. This architecture fragments the access layer into isolated Wi-Fi islands, duplicates infrastructure in dense urban settings, and imposes high last-metre deployment costs in rural and mountainous regions. The central deficiency is not bandwidth alone; it is the absence of a subscriber-centric access fabric in which identity, authorisation, QoS entitlement, accounting, and regulatory traceability can follow an authenticated user across participating shared access points.
+
+This proposal presents a safety-constrained subscriber-centric broadband architecture using Nepal as the primary empirical testbed while retaining applicability to emerging-economy access networks more generally. The design separates hard safety conditions - authentication validity, policy compliance, per-tenant slice isolation, and accounting consistency - from performance objectives. Learning-based optimisation is permitted only inside the state-dependent safe feasible action set.
+
+The architecture integrates IEEE 802.1X/\eap{}-TLS and Passpoint-style identity provisioning, \radsec{}-federated \radius{} authentication, policy-driven multi-tenant edge slicing through Linux \texttt{tc}/\htb{}/\fqcodel{} and VLAN/VXLAN mechanisms, secure overlay transport through WireGuard or VXLAN, a two-timescale control model that separates commodity-edge fast-path enforcement from graph-neural-network macro-policy optimisation, and optional LEO/Starlink-class backhaul for rural Himalayan scenarios.
+
+The revised mathematical model deliberately avoids pseudo-rigorous overclaiming. The finite implementation queue is modelled as a reflected/censored drop-tail process, while Large Deviations Theory is applied only to an auxiliary infinite-buffer workload. Effective-bandwidth root matching is stated using a supremum definition unless root existence is empirically or analytically justified. The CMDP is formulated consistently in cost-minimisation form with a state-dependent safe action set. LEO backoff equations use dimensionless normalised inputs and clamped control horizons. HMAC-based survivability targets are stated as empirical acceptance criteria, not cryptographic guarantees.
+
+The expected output is a reproducible architecture and evaluation methodology for secure, accountable, edge-aware, and optimisation-assisted shared broadband access, directly actionable for Nepal and generalisable to emerging-economy contexts with comparable access fragmentation, backhaul instability, and regulatory accountability constraints.
+
+\vspace{6pt}
+\noindent\textbf{Keywords:} subscriber-centric broadband; shared Wi-Fi; \radsec{}; \eap-TLS; edge slicing; safe CMDP; effective bandwidth; two-timescale control; LEO backhaul; Nepal broadband; graph neural networks.

@@ -1,0 +1,78 @@
+%% ============================================================
+%%  Chapter 1 - Introduction
+%% ============================================================
+\chapter{Introduction}
+\label{ch:intro}
+
+\section{Background}
+\label{sec:background}
+
+Broadband expansion is usually measured through subscription counts, coverage ratios, average throughput, and affordability indices. These indicators are necessary, but they do not capture the architectural efficiency of the fixed broadband access edge. In residential, hostel, campus, and small-office deployments, access is typically bound to a private router controlled by one subscriber:
+
+\begin{equation}
+  \text{one subscriber} \to \text{one line/ONT} \to \text{one router} \to \text{one isolated Wi-Fi island.}
+  \label{eq:router-centric}
+\end{equation}
+
+This structure fragments the access layer. Neighbouring subscribers in the same building duplicate routers, SSIDs, cabling, power usage, spectrum occupation, and maintenance effort. In dense urban environments the dominant consequences are overlapping service sets, unmanaged co-channel interference, redundant access points, poor spectrum reuse, and absent roaming continuity. In rural and mountainous regions the same router-centric model manifests as high last-metre deployment cost, difficult maintenance, backhaul scarcity, and low infrastructure reuse.
+
+Existing shared-access approaches solve only partial versions of this problem. Captive portals and public hotspots expand connectivity but lack cryptographic subscriber identity, ISP-grade per-user QoS enforcement, and reliable accounting. Enterprise Wi-Fi systems provide strong local management but do not generalise beyond one administrative domain. Passpoint and eduroam-style systems demonstrate that federated profile-based access can be operationalised at scale~\cite{rfc7593,wba-openroaming}, but they do not by themselves provide a complete model for broadband-package portability, edge slicing, regulatory traceability, and graph-optimised radio resource allocation. Cellular network slicing provides sophisticated control~\cite{3gpp-ts23501}, but its infrastructure assumptions are not directly suited to low-cost Wi-Fi-based fixed broadband.
+
+This research proposes a \textbf{subscriber-centric broadband model} in which the subscriber identity, rather than a local router password or SSID, becomes the primary control primitive for authentication, authorisation, QoS, slice enforcement, accounting, and auditability.
+
+\section{Nepal as Empirical Testbed and Generalisation Frame}
+\label{sec:nepal}
+
+Nepal is a strong empirical testbed because it combines dense urban broadband growth, rural and mountainous deployment difficulty, power and terrain constraints, dependence on middle-mile and upstream connectivity, and explicit regulatory interest in digital infrastructure~\cite{worldbank-digitalnepal2022,nta-mis2024}. These conditions are not treated as isolated national peculiarities. They define a broader emerging-economy access class where fragmented last-metre infrastructure, uneven service quality, and accountability requirements coexist.
+
+Four Nepal scenario classes structure the evaluation:
+\begin{enumerate}
+  \item dense urban residential clusters, such as Kathmandu-class Wi-Fi-dense buildings;
+  \item semi-urban venue clusters, such as terai towns, campuses, hostels, and small commercial areas;
+  \item rural extension zones, such as hillside settlements with unstable terrestrial backhaul;
+  \item backhaul-constrained mountain settlements, where LEO satellite is evaluated as an optional resilience extension.
+\end{enumerate}
+
+Starlink is therefore referenced only as a Starlink-class implementation of LEO satellite backhaul. The formal architecture remains vendor-neutral.
+
+\section{Research Problem}
+\label{sec:problem}
+
+The central research problem is that fixed broadband access remains structurally router-centric. Subscriber entitlement is bound to a physical access device and local credentials rather than to a portable, authenticated, policy-governed identity. This creates three linked failures: duplicated access infrastructure, non-portable subscriber entitlement, and lack of a unified systems framework connecting identity, policy, slicing, telemetry, optimisation, and accounting.
+
+\begin{quote}
+\textbf{Research Problem Statement:} How can fixed broadband access be redesigned from a router-centric model into a subscriber-centric, identity-governed, multi-tenant edge access architecture that enables secure roaming across participating access points while preserving ISP policy control, per-user QoS, traffic isolation, accounting continuity, and regulatory traceability in Nepal-like and broader emerging-economy environments?
+\end{quote}
+
+\section{Research Aim}
+\label{sec:aim}
+
+The aim of this research is to design, implement, and evaluate a safety-constrained subscriber-centric shared broadband architecture that enables authenticated subscribers to access participating broadband edge nodes through secure identity federation, enforceable multi-tenant slicing, measurable QoS and accounting, and graph-assisted resource allocation within the resource constraints of commodity \openWrt-class edge hardware.
+
+\section{Research Objectives}
+\label{sec:objectives}
+
+\begin{description}
+  \item[O1.] Develop a subscriber-centric architecture separating trust, edge enforcement, backhaul selection, telemetry, optimisation, survivability, and audit functions.
+  \item[O2.] Implement a minimum viable prototype using \openWrt{}, hostapd, \freeradius{}, VLANs, Linux \texttt{tc}, VXLAN, and WireGuard while measuring edge CPU, RAM, interrupts, cryptographic overhead, tunnel overhead, and telemetry cost.
+  \item[O3.] Define a two-timescale control architecture in which AP-local fast-path enforcement handles packet-scale events while a graph-based optimiser updates macro policies at slower epochs.
+  \item[O4.] Formalise access allocation as a constrained optimisation problem where authentication, policy compliance, isolation, accounting, and edge-resource feasibility define the feasible action space.
+  \item[O5.] Evaluate graph-based allocation against random, greedy, static, and unconstrained-learning baselines without allowing violations of safety constraints.
+  \item[O6.] Scope physics-informed modelling correctly: indoor Wi-Fi uses log-distance/multi-wall models; rain and earth-space propagation models are reserved for LEO and long-range backhaul.
+  \item[O7.] Evaluate LEO/Starlink-class backhaul as an optional rural-resilience path rather than as a prerequisite.
+  \item[O8.] Model Nepal-specific survivability under power cuts, fibre disruption, and intermittent backhaul through token-cache degraded mode and signed offline accounting.
+\end{description}
+
+\section{Research Questions}
+\label{sec:rq}
+
+\begin{description}
+  \item[RQ1.] How can subscriber identity be operationalised as the primary control primitive for authentication, authorisation, QoS enforcement, accounting, and slice isolation across shared broadband access points?
+  \item[RQ2.] To what extent can a commodity prototype based on \openWrt{}, \freeradius{}, VLAN/\texttt{tc}, WireGuard/VXLAN, and \radius{} accounting enforce secure multi-tenant broadband access while remaining within edge-resource feasibility bounds?
+  \item[RQ3.] Can graph-based macro-policy optimisation improve throughput, fairness, interference management, and SLA compliance compared with static, greedy, and unconstrained-learning baselines in Nepal-like dense and rural scenarios?
+\end{description}
+
+\section{Research Contributions}
+\label{sec:contributions}
+
+The primary contributions are: (C1) a subscriber-centric access model; (C2) a safety-constrained multi-plane architecture; (C3) a safety-constrained resource-allocation formulation combining finite-buffer implementation loss, auxiliary effective-bandwidth overflow estimation, edge-aware graph telemetry, and state-dependent CMDP control without treating authentication failures, policy violations, slice leakage, accounting mismatch, or edge-resource infeasibility as optimisable soft penalties; (C4) a reproducible five-track evaluation methodology; and (C5) a Nepal-grounded deployment framework with optional LEO backhaul resilience.

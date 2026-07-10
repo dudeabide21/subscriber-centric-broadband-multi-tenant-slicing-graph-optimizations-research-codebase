@@ -1,0 +1,28 @@
+%% ============================================================
+%%  Clean Layered Architecture Figure (readable, no clipping)
+%% ============================================================
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  layer/.style={rectangle, rounded corners, draw=black, thick, align=center, text width=11.2cm, minimum height=1.25cm},
+  arrow/.style={-{Latex[length=2.8mm]}, thick},
+  dasharrow/.style={-{Latex[length=2.8mm]}, thick, dashed}
+]
+
+\node[layer, fill=softblue] (trust) at (0,0) {\textbf{Trust and policy plane}\\Subscriber identity $\rightarrow$ AP authenticator $\rightarrow$ AAA/RadSec federation $\rightarrow$ home policy/accounting};
+\node[layer, fill=softgreen] (edge) at (0,-1.95) {\textbf{Fast edge enforcement plane}\\Safety gate: $Auth\land Pol\land Iso\land Acct$\\VLAN/tc/HTB slicing $\rightarrow$ queue and VXLAN/WireGuard tunnel};
+\node[layer, fill=softorange] (backhaul) at (0,-4.05) {\textbf{Backhaul and gateway plane}\\Backhaul selector $\rightarrow$ terrestrial path by default\\optional LEO/Starlink-class path $\rightarrow$ home/sovereign gateway};
+\node[layer, fill=softgray] (analytics) at (0,-6.25) {\textbf{Telemetry, optimisation, and survivability plane}\\RF/queue/accounting telemetry $\rightarrow$ graph state $\bar{G}_{\tau}$ $\rightarrow$ slow GNN/CMDP update\\token cache and signed offline logs for degraded mode};
+
+\draw[arrow] (trust.south) -- node[right]{policy attributes} (edge.north);
+\draw[arrow] (edge.south) -- node[right]{safe session} (backhaul.north);
+\draw[dasharrow] (backhaul.south) -- node[right]{telemetry} (analytics.north);
+\draw[dasharrow] (analytics.west) -- ++(-0.8,0) |- node[pos=0.22,left]{slow feedback only} (trust.west);
+
+\node[align=center, font=\footnotesize] at (0,-7.55) {\textbf{Control split:} fast path = local AP/gateway, $1$--$100$ ms; slow path = regional/controller, $10$--$60$ s.};
+
+\end{tikzpicture}
+\caption{Clean layered subscriber-centric broadband architecture. The packet fast path remains local at the edge AP, while the GNN/CMDP block only issues slow macro-policy updates. Optional LEO backhaul is isolated to the backhaul plane and cannot bypass the safety gate.}
+\label{fig:architecture-clean}
+\end{figure}
