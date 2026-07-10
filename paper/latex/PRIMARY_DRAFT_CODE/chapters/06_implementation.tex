@@ -1,0 +1,94 @@
+%% ============================================================
+%%  Chapter 6 - Implementation Blueprints and Algorithms
+%% ============================================================
+\chapter{Implementation Blueprints and Core Algorithms}
+\label{ch:impl}
+
+\section{Authentication and Slice Assignment}
+\label{sec:alg-auth}
+
+\begin{algorithm}[H]
+  \caption{Safety-Constrained Subscriber Authentication and Slice Assignment}
+  \label{alg:auth-slice}
+  \KwData{Subscriber request $Req_i$, visited AP $a_j$, home domain $d_i$, policy database $\mathcal{P}$}
+  \KwResult{Access decision, slice assignment, accounting state}
+  Receive 802.1X/EAPOL association request from device $s_i$\;
+  Forward \eap{} payload from $a_j$ to visited \radius{} proxy\;
+  Resolve home domain $d_i$ from subscriber NAI\;
+  Forward authentication request via \radsec{} federation to home \radius{}\;
+  \eIf{\eap{}-TLS mutual authentication succeeds}{
+    Retrieve full subscriber policy profile $p_i$\;
+    Compute $k^*\leftarrow slice(p_i,\alpha_i)$\;
+    Verify $Pol_{ik^*}=1$\;
+    Evaluate CPU, RAM, IRQ, backhaul, and ring-buffer feasibility for $k^*$\;
+    \eIf{$u=(s_i,a_j,k^*)\in\Usafe(x)$}{
+      Assign slice $k^*$ and install VLAN/\texttt{tc}/tunnel rules\;
+      Initialise \radius{} accounting session $\rho_i$\;
+      \Return{Access-Accept with slice, QoS, and accounting attributes}\;
+    }{
+      \Return{Access-Reject with policy/capacity/resource failure reason}\;
+    }
+  }{
+    \Return{Access-Reject with EAP failure reason}\;
+  }
+\end{algorithm}
+
+\section{Backhaul Selection}
+\label{sec:alg-backhaul}
+
+\begin{algorithm}[H]
+  \caption{Safety-First Backhaul Selection}
+  \label{alg:backhaul}
+  \KwData{Valid session $o_i$, AP state $a_j$, terrestrial state $H_T$, LEO state $H_L$, policy profile $p_i$}
+  \KwResult{Selected backhaul mode and forwarding rule}
+  Verify pre-condition: $Auth_i=Pol_i=Iso_i=Acct_i=1$\;
+  Estimate terrestrial cost $C_T$ using RTT, jitter, loss, capacity, gateway reachability\;
+  Estimate LEO cost $C_L$ using Eq.~\eqref{eq:leo-cost}\;
+  \eIf{terrestrial path satisfies policy SLA bounds}{
+    Select terrestrial path\;
+  }{
+    \eIf{LEO path is policy-permitted and available}{
+      Select LEO path and activate Eq.~\eqref{eq:leo-backoff-clean}\;
+    }{
+      Enter degraded local service if token-cache policy permits\;
+    }
+  }
+  Install forwarding rule and record selected path in accounting log\;
+\end{algorithm}
+
+\section{Edge Survivability and Token Cache}
+\label{sec:alg-surv}
+
+\begin{algorithm}[H]
+  \caption{Cached Token Verification and Offline Accounting}
+  \label{alg:survivability}
+  \KwData{Client request $Req_i$, cached token $\tau_i$, local key $\Knet$, key age $\Delta t_{\Knet}$}
+  \KwResult{Offline access decision and signed accounting record}
+  \eIf{$\Delta t_{\Knet}>2T_{\mathrm{rot}}$}{
+    Reject cached mode and apply guest-degraded caps\;
+  }{
+    Recompute $\tau_i^{exp}\leftarrow\hmaclabel{}_{\Knet}(ID_i\|TS_i\|SLA_i)$\;
+    Verify anti-replay, token equality, and TTL\;
+    \eIf{all checks pass}{
+      Grant capped degraded-mode access: $b_i^{offline}\leq0.5b_i^{max}$\;
+      Append signed offline accounting record $\hat{\rho}_i\leftarrow\hmaclabel{}_{\Knet}(\rho_i\|TS_i)$\;
+    }{
+      Reject with cached-verification failure\;
+    }
+  }
+  On backhaul recovery, flush signed records to home \radius{} and resume online authentication\;
+\end{algorithm}
+
+
+\section{Algorithmic Complexity and Control Overhead}
+\label{sec:algorithmic-overhead}
+
+Algorithm~\ref{alg:auth-slice} incurs one 802.1X/EAP exchange, one visited-to-home
+RADIUS/RadSec authentication path, one home-policy lookup, one local edge-feasibility
+evaluation, and one slice-rule installation per new session. Algorithm~\ref{alg:backhaul}
+evaluates a constant number of candidate backhaul modes per AP and macro epoch, so
+its online decision overhead is $O(|\mathcal{H}|)$ per AP. Algorithm~\ref{alg:survivability}
+performs constant-time HMAC verification per cached-token attempt and appends one
+signed offline accounting record per accepted degraded-mode session. None of the three
+algorithms places graph-neural-network inference in the packet fast path; learning-based
+optimisation remains restricted to the slow macro-policy loop.
