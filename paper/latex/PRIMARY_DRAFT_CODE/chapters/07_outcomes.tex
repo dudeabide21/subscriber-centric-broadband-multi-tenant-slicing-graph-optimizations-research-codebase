@@ -1,0 +1,119 @@
+%% ============================================================
+%%  Chapter 7 - Outcomes, Risks, Plan, Limitations
+%% ============================================================
+\chapter{Expected Outcomes, Risk Mitigation, and Research Plan}
+\label{ch:outcomes}
+
+\section{Expected Outcomes}
+\label{sec:outcomes}
+
+Expected outputs include: a validated subscriber-centric access model; a commodity AP prototype; an edge-resource feasibility dataset; a reproducible emulation and simulation stack; a graph-aware macro-policy optimiser; a terrestrial/LEO backhaul resilience evaluation; and a Nepal-grounded deployment framework.
+
+\begin{table}[H]
+\centering
+\caption{Research contributions mapped to objectives and questions.}
+\label{tab:contributions}
+\begin{tabularx}{\textwidth}{llXl}
+\toprule
+\textbf{Contribution} & \textbf{Form} & \textbf{Description} & \textbf{Addresses} \\
+\midrule
+C1 & Framework & Subscriber identity as root control variable. & O1; RQ1 \\
+C2 & Architecture & Four-plane architecture with hard safety feasibility. & O3--O4; RQ1--RQ2 \\
+C3 & Formal model & Safety-constrained resource allocation combining finite-buffer implementation loss, auxiliary effective-bandwidth overflow estimation, edge-aware graph telemetry, and state-dependent CMDP control. & O4--O5; RQ3 \\
+C4 & Methodology & Typed evidence tracks and ablation protocol. & O2, O5; RQ2--RQ3 \\
+C5 & Deployment & Nepal scenario classes with optional LEO resilience. & O6--O8; RQ1--RQ3 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Validity Strategy}
+\label{sec:validity}
+
+Internal validity is protected through controlled baselines, repeated trials, and isolation of authentication, slicing, tunnelling, queueing, control, and backhaul variables. Construct validity is protected by the metric-to-RQ alignment in Table~\ref{tab:metrics}. External validity is addressed through four scenario classes rather than a single deployment case. Mathematical validity is protected by separating implementation queues from auxiliary LDT queues, treating safety as state-dependent feasibility, and avoiding unproved root-existence claims.
+
+\section{Reproducibility}
+\label{sec:reproducibility}
+
+All prototype configurations, \radius{} policies, \texttt{tc} scripts, topology generators, telemetry schemas, graph model checkpoints, and analysis notebooks will be version-controlled. Experimental outputs will be tagged by evidence class: measured, emulated, simulated, or contextual.
+
+
+\section{Ethical and Security Considerations}
+\label{sec:ethics}
+
+The threat model assumes that the home AAA domain is authoritative for subscriber
+policy and accounting identity, while visited APs and visited domains are semi-trusted
+enforcement points. Rogue APs may attempt to impersonate participating infrastructure,
+replay cached credentials, misapply slice policy, or suppress accounting records.
+Subscribers may attempt credential sharing, replay, or service-class escalation. A
+network adversary may observe or disrupt transport links but is not assumed to break
+standard TLS or HMAC primitives.
+
+The design mitigates these threats by requiring administratively enrolled APs,
+EAP-TLS or equivalent profile-based subscriber authentication, RadSec-protected
+inter-domain RADIUS transport, short-lived cached tokens with anti-replay timestamps,
+key-age rejection after $2T_{\mathrm{rot}}$, VLAN/VNI and traffic-control isolation
+checks, and reconciliation of RADIUS, AP, gateway, and offline signed accounting
+counters. The cached-token mechanism is treated as an operational survivability
+mechanism, not as a Byzantine-fault-tolerant security protocol.
+
+Subscriber identities are pseudonymised. No payload inspection is used except on
+controlled synthetic traffic for isolation testing. Authentication and accounting logs are
+minimised to evaluation-required fields. Offline cached-token mode uses short token
+lifetimes, capped bandwidth, anti-replay timestamps, and signed offline accounting. Any
+field deployment in Nepal will require relevant institutional and regulatory approval.
+
+\section{Risk Register}
+\label{sec:risks}
+
+\begin{table}[H]
+\centering
+\caption{Reviewer and implementation risk register with mitigation plan.}
+\label{tab:risks}
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+\textbf{Risk} & \textbf{Impact} & \textbf{Mitigation} \\
+\midrule
+Commodity AP compute ceiling & Throughput collapses before wireless congestion is measurable. & Treat edge compute as a primary evaluation layer. \\
+GNN temporal staleness & Controller optimises an obsolete graph state. & Use two-timescale control and slow macro updates only. \\
+Queueing formalism overreach & Finite-buffer and LDT models are conflated. & Split implementation queue and auxiliary infinite-buffer LDT queue. \\
+Root existence overclaim & Effective-bandwidth root may not exist. & Use supremum definition; root equality only when crossing conditions hold. \\
+CMDP sign mismatch & Reward and cost formulations conflict. & Use cost minimisation; define reward only as negative cost if needed. \\
+PINN scope creep & Rain attenuation incorrectly applied to indoor Wi-Fi. & Use multi-wall Wi-Fi model; reserve ITU-R rain physics for LEO/backhaul. \\
+LEO availability uncertainty & Rural backhaul claim appears speculative. & Evaluate LEO as optional resilience, always reporting terrestrial-only baselines. \\
+Safety-constraint bypass & Security failures treated as performance penalties. & Use state-dependent safe action set and reject invalid actions before optimisation. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Work Plan and Timeline}
+\label{sec:timeline}
+
+\begin{table}[H]
+\centering
+\caption{Proposed research timeline with explicit deliverables.}
+\label{tab:timeline}
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{Phase} & \textbf{Period} & \textbf{Deliverable} \\
+\midrule
+Mathematical finalisation & July 2026 & Queueing, LDT, CMDP, GNN, PINN, and LEO equations finalised. \\
+Literature consolidation & July--August 2026 & Standards map, literature taxonomy, claim-to-citation matrix. \\
+Hardware procurement & August 2026 & AP cluster, RADIUS server, gateway node, measurement scripts. \\
+Prototype implementation & September--November 2026 & OpenWrt/FreeRADIUS prototype with VLAN/tc and tunnel slicing. \\
+Baseline experiments & November--December 2026 & WPA-PSK, captive portal, VLAN-only, greedy, DQN, vanilla GNN baselines. \\
+Emulation and simulation & December 2026--January 2027 & Mininet-WiFi, NS-3, PyTorch Geometric results. \\
+Nepal scenario validation & February--March 2027 & Four-scenario deployment and regulatory plausibility analysis. \\
+Writing and revision & March--May 2027 & Submission-ready IEEE TNSM manuscript. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Limitations}
+\label{sec:limitations}
+
+The research is scoped to the access edge. It does not redesign national backbone networks, replace cellular slicing, or guarantee immediate commercial inter-ISP federation. Prototype results on selected OpenWrt-class devices do not generalise to all consumer routers. Learning-based results are conditioned on evidence class and cannot be treated as field-proven unless validated through prototype or deployment evidence. LEO availability, licensing, cost, and handover behaviour vary by region; therefore, LEO is an optional resilience extension, not a core assumption.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+This proposal presents a safety-constrained, mathematically corrected, and deployment-aware blueprint for subscriber-centric broadband infrastructure. The revised formulation removes hidden contradictions by separating finite queue implementation from auxiliary LDT analysis, using state-dependent safe action sets, normalising LEO backoff terms, treating HMAC resource targets as empirical criteria, and restricting physics-informed modelling to technically appropriate link types. Nepal functions as the primary empirical testbed because it exposes dense urban Wi-Fi fragmentation, rural mountain backhaul constraints, intermittent infrastructure, and regulatory accountability within one national context.
