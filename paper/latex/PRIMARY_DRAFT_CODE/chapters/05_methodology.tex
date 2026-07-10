@@ -1,0 +1,190 @@
+%% ============================================================
+%%  Chapter 5 - Methodology and Evaluation Framework
+%% ============================================================
+\chapter{Methodology and Evaluation Framework}
+\label{ch:methodology}
+
+\section{Research Design}
+\label{sec:design}
+
+The study uses design-science systems research~\cite{hevner2004design}, controlled experimentation, emulation, simulation, and contextual validation. The artifact is the safety-constrained subscriber-centric broadband architecture. Evaluation tests whether the artifact satisfies authentication, isolation, QoS, accounting, edge feasibility, optimisation, LEO-assisted resilience, and Nepal-context deployment requirements.
+
+Five evidence tracks are defined:
+\begin{description}
+  \item[Track 1 - Prototype:] OpenWrt + FreeRADIUS + VLAN/\texttt{tc} + WireGuard/VXLAN. Provides measured ground truth for authentication latency, slicing overhead, and AP resource consumption.
+  \item[Track 2 - Edge overhead:] Hardware-in-the-loop benchmarking on constrained APs under slice saturation.
+  \item[Track 3 - Emulation:] Mininet-WiFi topologies calibrated against prototype measurements.
+  \item[Track 4 - Simulation and optimisation:] NS-3 and PyTorch Geometric scenarios evaluating graph-based macro policy.
+  \item[Track 5 - Contextual validation:] Nepal scenario mapping, NTA regulatory compatibility, and deployment plausibility.
+\end{description}
+
+\section{Dataset Design}
+\label{sec:dataset}
+
+All records are classified as Measured, Emulated, Simulated, or Contextual (M/E/S/C). Claims cannot be extended beyond their evidence class.
+
+\begin{longtable}{p{3.0cm}p{5.2cm}p{5.0cm}}
+  \caption{Dataset matrices, variables, and analytical role.}\label{tab:dataset}\\
+  \toprule
+  \textbf{Matrix} & \textbf{Core Variables} & \textbf{Analytical Role} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Matrix} & \textbf{Core Variables} & \textbf{Analytical Role} \\
+  \midrule
+  \endhead
+  Identity-session matrix (M/E) & Subscriber pseudonym, realm, visited AP, home domain, EAP method, auth result, failure code, auth latency, session duration, accounting ID. & Tests whether identity operates as primary access-control primitive. \\
+  Slice-performance matrix (M/E) & Slice ID, VLAN/VNI, rate cap, throughput, latency, jitter, loss, queue occupancy, tunnel overhead, SLA status. & Tests subscriber-specific QoS and slice enforcement. \\
+  Edge-resource matrix (M) & CPU, RAM, IRQ rate, crypto throughput, encapsulation overhead, queueing cost, telemetry cost. & Determines AP feasibility under resource constraints. \\
+  Radio-topology matrix (M/E/S) & AP ID, subscriber ID, RSSI, SNR, channel, retry rate, channel utilisation, edge weight, wall class. & Constructs graph states and path-loss validation data. \\
+  Queueing matrix (M/E/S) & Arrival increments $A_k(t+\Delta)-A_k(t)$, service rate $C_k$, buffer threshold $B_k$, loss process increments $L_k^B$. & Estimates diffusion coefficient, overflow risk, and finite-buffer loss. \\
+  Backhaul-resilience matrix (M/E) & Backhaul mode, RTT, jitter, packet loss, outage, LEO handover risk, terminal power, failover time. & Evaluates terrestrial and LEO resilience. \\
+  Accounting-consistency matrix (M/E) & RADIUS counters, AP counters, gateway counters, byte mismatch, termination cause, offline signature. & Tests normal and degraded-mode auditability. \\
+  Control-loop matrix (M/E/S) & GNN inference time, telemetry aggregation delay, policy update latency, epoch staleness, rollback rate. & Validates two-timescale separation. \\
+  Contextual deployment matrix (C) & Location class, terrain class, backhaul type, power reliability proxy, regulatory constraint. & Maps Nepal-specific conditions to emerging-economy scenario classes. \\
+  \bottomrule
+\end{longtable}
+
+\section{Data-Plane Tooling Hierarchy}
+\label{sec:edge-tooling}
+
+Commodity baseline enforcement uses Linux \texttt{tc}, \htb{}, \fqcodel{}, VLANs, and optionally VXLAN/WireGuard depending on the benchmark path. eBPF/XDP is not assumed on all APs; it is evaluated only on premium ARMv8/x86 nodes as an advanced benchmark track. This prevents the proposal from claiming low-end feasibility for mechanisms that may require stronger kernel, driver, and CPU support.
+
+\section{System-Level Telemetry Throttle}
+\label{sec:telemetry}
+
+To prevent telemetry from competing with user-plane data, the system-level
+telemetry interval is
+
+\begin{equation}
+\Delta t_{\mathrm{eff}}^{\mathrm{sys}}
+=
+\operatorname{clip}_{[\Delta t_{\mathrm{base}},\Delta t_{\mathrm{sys,max}}]}
+\left(
+\Delta t_{\mathrm{base}}
+\exp
+\left[
+\kappa_B
+\left[
+1-
+\frac{B_{\mathrm{curr}}}{B_{\mathrm{nominal}}+\epsilon}
+\right]_+
++
+\kappa_{\mathrm{CPU}}
+\frac{CPU_j(t)}{CPU_j^{\max}}
+\right]
+\right),
+\label{eq:system-telemetry-throttle-clean}
+\end{equation}
+
+where \([x]_+=\max(0,x)\). The coefficient $\kappa_B$ controls sensitivity to
+backhaul degradation, while $\kappa_{\mathrm{CPU}}$ controls sensitivity to AP CPU
+pressure. These are calibrated non-negative sensitivity coefficients and are not
+required to sum to one. The positive-part operator prevents the telemetry controller
+from increasing sampling frequency merely because transient throughput exceeds the
+nominal baseline. This equation is separate from the LEO-specific backoff in
+Eq.~\eqref{eq:leo-backoff-clean}.
+
+\section{Experimental Baselines}
+\label{sec:baselines}
+
+\begin{enumerate}
+  \item B1 - WPA-PSK router-centric baseline.
+  \item B2 - Captive portal baseline.
+  \item B3 - VLAN-only static policy baseline.
+  \item B4 - Greedy AP/channel allocation baseline.
+  \item B5 - DQN-style unconstrained learning baseline.
+  \item B6 - Vanilla GNN without state-dependent safety filtering.
+  \item B7 - Terrestrial-only backhaul and LEO-assisted backhaul variants reported separately.
+\end{enumerate}
+
+A configuration is accepted only if it improves the composite performance score
+while satisfying all hard feasibility constraints:
+
+\begin{equation}
+Accept(\mathcal{M})=1
+\iff
+S(\mathcal{M})-S(\mathcal{B})>\Delta_{\min}
+\land
+\pi\in\Pi_{\mathrm{safe}}
+\land
+\mathbf{R}^{\mathrm{edge}}_j\le\mathbf{R}^{\max}_j.
+\label{eq:acceptance-rule-clean}
+\end{equation}
+
+The composite score is
+
+\begin{equation}
+S(\mathcal{M})
+=
+\zeta_1T_{5p}(\mathcal{M})
+-
+\zeta_2L_{95p}(\mathcal{M})
+-
+\zeta_3V_{\mathrm{SLA}}(\mathcal{M})
++
+\zeta_4J(\tilde{\mathbf{b}})
+-
+\zeta_5O_{\mathrm{edge}}(\mathcal{M}),
+\label{eq:composite-score}
+\end{equation}
+
+where \(T_{5p}\) is fifth-percentile throughput, \(L_{95p}\) is
+ninety-fifth-percentile latency, \(V_{\mathrm{SLA}}\) is the SLA violation
+rate, \(J(\tilde{\mathbf{b}})\) is Jain fairness over normalised subscriber
+entitlements, and \(O_{\mathrm{edge}}\) is measured edge-compute overhead.
+
+This prevents the evaluation from accepting a configuration merely because it
+improves average throughput while degrading tail latency, fairness, SLA
+satisfaction, or commodity-edge feasibility.
+
+\section{Ablation Study Plan}
+\label{sec:ablation}
+
+The full model is compared with ablated variants:
+\begin{equation}
+  \mathcal{M}_{full},\;\mathcal{M}_{-graph},\;\mathcal{M}_{-policy},\;\mathcal{M}_{-physics},\;\mathcal{M}_{-adaptive},\;\mathcal{M}_{-surv},\;\mathcal{M}_{-LEO}.
+  \label{eq:ablation}
+\end{equation}
+
+\section{Evaluation Metrics}
+\label{sec:metrics}
+
+\begin{table}[H]
+\centering
+\caption{Metric-to-research-question alignment.}
+\label{tab:metrics}
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+\textbf{RQ} & \textbf{Metric Class} & \textbf{Operational Definition} \\
+\midrule
+RQ1 & Identity and policy & Authentication success, EAP/RADIUS latency, realm resolution success, policy-attribute correctness, reject accuracy. \\
+RQ2 & Slice enforcement & Cross-slice leakage, tunnel overhead, per-user bandwidth compliance, shaped latency, accounting mismatch. \\
+RQ2 & Edge feasibility & CPU, RAM, IRQ, crypto, tunnel, queueing, telemetry overhead. \\
+RQ3 & Optimisation & Aggregate throughput, fifth-percentile throughput, Jain fairness, SLA violation, interference-cost reduction. \\
+RQ3 & Queue stability & Estimated $\hat{\sigma}_{k,	au}^2$, finite-buffer loss rate, auxiliary $P(Q_k^\infty>B_k)$ estimate. \\
+RQ1--3 & Deployment viability & Configuration complexity, AP density, terrestrial/LEO sensitivity, NTA compatibility. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Statistical Analysis Plan}
+\label{sec:stats}
+
+For paired comparisons, the treatment effect is
+\begin{equation}
+  \Delta Y=\frac{1}{R}\sum_{r=1}^{R}(Y_{r,c^*}-Y_{r,c_0}).
+  \label{eq:treatment-effect}
+\end{equation}
+A mixed-effects model accounts for AP, subscriber, and scenario variation:
+\begin{equation}
+  Y_{ijst}=\beta_0+\beta_1Config_i+\beta_2Density_j+\beta_3Backhaul_k+\beta_4Mobility_l+u_s+\varepsilon_{ijst}.
+  \label{eq:mixed-effects}
+\end{equation}
+
+Because the evaluation compares multiple baselines, scenario classes, and metrics,
+confirmatory hypothesis tests are corrected using the Holm--Bonferroni family-wise
+error-rate procedure within each metric family. Exploratory secondary analyses may
+additionally report Benjamini--Hochberg false-discovery-rate adjusted values, clearly
+labelled as exploratory. The correction method is fixed before comparative baseline
+results are analysed.
