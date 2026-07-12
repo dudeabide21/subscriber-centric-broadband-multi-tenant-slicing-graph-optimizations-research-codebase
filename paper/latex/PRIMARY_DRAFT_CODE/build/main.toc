@@ -1,0 +1,64 @@
+\contentsline {chapter}{Abstract}{v}{chapter*.4}%
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Background}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Nepal as Empirical Testbed and Generalisation Frame}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Research Problem}{2}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Research Aim}{3}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Research Objectives}{3}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Research Questions}{4}{section.1.6}%
+\contentsline {section}{\numberline {1.7}Research Contributions}{4}{section.1.7}%
+\contentsline {chapter}{\numberline {2}Literature Review and Theoretical Framework}{5}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Federated Authentication and Subscriber Identity}{5}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Wi-Fi Roaming, Hotspots, and Shared Access}{5}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Edge Slicing and Secure Overlay Transport}{6}{section.2.3}%
+\contentsline {section}{\numberline {2.4}LEO Backhaul and Rural Resilience}{6}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Graph Learning and Wireless Resource Allocation}{6}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Theoretical Framework}{6}{section.2.6}%
+\contentsline {chapter}{\numberline {3}System Architecture}{8}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Architectural Boundary Conditions}{8}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Clean Four-Plane Architecture}{8}{section.3.2}%
+\contentsline {paragraph}{Trust and policy plane.}{9}{section*.6}%
+\contentsline {paragraph}{Fast edge enforcement plane.}{9}{section*.7}%
+\contentsline {paragraph}{Backhaul and gateway plane.}{9}{section*.8}%
+\contentsline {paragraph}{Telemetry, optimisation, and survivability plane.}{9}{section*.9}%
+\contentsline {section}{\numberline {3.3}Fast Path, Slow Path, and Control Epochs}{9}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Commodity Edge Resource Budget}{10}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Driver Buffer Admission Heuristic}{10}{subsection.3.4.1}%
+\contentsline {section}{\numberline {3.5}Edge Survivability Under Local Isolation}{11}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Normalised LEO Control Backoff}{11}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Systems Verification Matrix}{12}{section.3.7}%
+\contentsline {chapter}{\numberline {4}Formal Mathematical Model}{13}{chapter.4}%
+\contentsline {section}{\numberline {4.1}System Variables}{13}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Notation, Parameter Selection, and Normalisation Convention}{14}{subsection.4.1.1}%
+\contentsline {section}{\numberline {4.2}Finite Implementation Queue and Auxiliary LDT Queue}{15}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Finite Drop-Tail Implementation Model}{16}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Diffusion Coefficient Estimation}{16}{subsection.4.2.2}%
+\contentsline {section}{\numberline {4.3}Large Deviations Bound for the Auxiliary Infinite Queue}{17}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Hard Safety Feasibility and State-Dependent Safe Actions}{18}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Interference Graph and Edge-Aware Attention}{19}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Physics-Informed Path-Loss Scope}{19}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Consistent Cost-Minimisation CMDP}{20}{section.4.7}%
+\contentsline {section}{\numberline {4.8}LEO Backhaul Resilience Cost}{21}{section.4.8}%
+\contentsline {chapter}{\numberline {5}Methodology and Evaluation Framework}{23}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Research Design}{23}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Dataset Design}{24}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Data-Plane Tooling Hierarchy}{25}{section.5.3}%
+\contentsline {section}{\numberline {5.4}System-Level Telemetry Throttle}{25}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Experimental Baselines}{25}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Ablation Study Plan}{26}{section.5.6}%
+\contentsline {section}{\numberline {5.7}Evaluation Metrics}{27}{section.5.7}%
+\contentsline {section}{\numberline {5.8}Statistical Analysis Plan}{27}{section.5.8}%
+\contentsline {chapter}{\numberline {6}Implementation Blueprints and Core Algorithms}{28}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Authentication and Slice Assignment}{28}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Backhaul Selection}{29}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Edge Survivability and Token Cache}{29}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Algorithmic Complexity and Control Overhead}{30}{section.6.4}%
+\contentsline {chapter}{\numberline {7}Expected Outcomes, Risk Mitigation, and Research Plan}{31}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Expected Outcomes}{31}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Validity Strategy}{32}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Reproducibility}{32}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Ethical and Security Considerations}{32}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Risk Register}{33}{section.7.5}%
+\contentsline {section}{\numberline {7.6}Work Plan and Timeline}{34}{section.7.6}%
+\contentsline {section}{\numberline {7.7}Limitations}{34}{section.7.7}%
+\contentsline {section}{\numberline {7.8}Conclusion}{35}{section.7.8}%

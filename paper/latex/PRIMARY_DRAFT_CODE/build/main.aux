@@ -1,0 +1,291 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\providecommand \oddpage@label [2]{}
+\@writefile{toc}{\contentsline {chapter}{Abstract}{v}{chapter*.4}\protected@file@percent }
+\citation{rfc7593,wba-openroaming}
+\citation{3gpp-ts23501}
+\@writefile{toc}{\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\newlabel{ch:intro}{{1}{1}{Introduction}{chapter.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.1}Background}{1}{section.1.1}\protected@file@percent }
+\newlabel{sec:background}{{1.1}{1}{Background}{section.1.1}{}}
+\newlabel{eq:router-centric}{{1.1}{1}{Background}{equation.1.1.1}{}}
+\citation{worldbank-digitalnepal2022,nta-mis2024}
+\@writefile{toc}{\contentsline {section}{\numberline {1.2}Nepal as Empirical Testbed and Generalisation Frame}{2}{section.1.2}\protected@file@percent }
+\newlabel{sec:nepal}{{1.2}{2}{Nepal as Empirical Testbed and Generalisation Frame}{section.1.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.3}Research Problem}{2}{section.1.3}\protected@file@percent }
+\newlabel{sec:problem}{{1.3}{2}{Research Problem}{section.1.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.4}Research Aim}{3}{section.1.4}\protected@file@percent }
+\newlabel{sec:aim}{{1.4}{3}{Research Aim}{section.1.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.5}Research Objectives}{3}{section.1.5}\protected@file@percent }
+\newlabel{sec:objectives}{{1.5}{3}{Research Objectives}{section.1.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.6}Research Questions}{4}{section.1.6}\protected@file@percent }
+\newlabel{sec:rq}{{1.6}{4}{Research Questions}{section.1.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {1.7}Research Contributions}{4}{section.1.7}\protected@file@percent }
+\newlabel{sec:contributions}{{1.7}{4}{Research Contributions}{section.1.7}{}}
+\citation{rfc6614}
+\citation{ieee8021x}
+\citation{rfc9190}
+\citation{rfc7542}
+\citation{rfc7593}
+\citation{passpoint2024,wba-openroaming}
+\citation{rfc7348}
+\citation{wireguard2017}
+\citation{openwrt2024}
+\citation{hoiland2018xdp}
+\@writefile{toc}{\contentsline {chapter}{\numberline {2}Literature Review and Theoretical Framework}{5}{chapter.2}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\newlabel{ch:litreview}{{2}{5}{Literature Review and Theoretical Framework}{chapter.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.1}Federated Authentication and Subscriber Identity}{5}{section.2.1}\protected@file@percent }
+\newlabel{sec:lit-aaa}{{2.1}{5}{Federated Authentication and Subscriber Identity}{section.2.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.2}Wi-Fi Roaming, Hotspots, and Shared Access}{5}{section.2.2}\protected@file@percent }
+\newlabel{sec:lit-wifi}{{2.2}{5}{Wi-Fi Roaming, Hotspots, and Shared Access}{section.2.2}{}}
+\citation{mohan2023starlink,ullah2025starlink,wu2024handover}
+\citation{kipf2017gcn,velickovic2018gat}
+\citation{shen2021gnn}
+\@writefile{toc}{\contentsline {section}{\numberline {2.3}Edge Slicing and Secure Overlay Transport}{6}{section.2.3}\protected@file@percent }
+\newlabel{sec:lit-slicing}{{2.3}{6}{Edge Slicing and Secure Overlay Transport}{section.2.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.4}LEO Backhaul and Rural Resilience}{6}{section.2.4}\protected@file@percent }
+\newlabel{sec:lit-leo}{{2.4}{6}{LEO Backhaul and Rural Resilience}{section.2.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.5}Graph Learning and Wireless Resource Allocation}{6}{section.2.5}\protected@file@percent }
+\newlabel{sec:lit-gnn}{{2.5}{6}{Graph Learning and Wireless Resource Allocation}{section.2.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.6}Theoretical Framework}{6}{section.2.6}\protected@file@percent }
+\newlabel{sec:theory}{{2.6}{6}{Theoretical Framework}{section.2.6}{}}
+\newlabel{eq:theory-chain}{{2.1}{7}{Theoretical Framework}{equation.2.6.1}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {3}System Architecture}{8}{chapter.3}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\newlabel{ch:arch}{{3}{8}{System Architecture}{chapter.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}Architectural Boundary Conditions}{8}{section.3.1}\protected@file@percent }
+\newlabel{sec:boundary}{{3.1}{8}{Architectural Boundary Conditions}{section.3.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}Clean Four-Plane Architecture}{8}{section.3.2}\protected@file@percent }
+\newlabel{sec:clean-architecture}{{3.2}{8}{Clean Four-Plane Architecture}{section.3.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Clean layered subscriber-centric broadband architecture. The packet fast path remains local at the edge AP, while the GNN/CMDP block only issues slow macro-policy updates. Optional LEO backhaul is isolated to the backhaul plane and cannot bypass the safety gate.}}{9}{figure.caption.5}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:architecture-clean}{{3.1}{9}{Clean layered subscriber-centric broadband architecture. The packet fast path remains local at the edge AP, while the GNN/CMDP block only issues slow macro-policy updates. Optional LEO backhaul is isolated to the backhaul plane and cannot bypass the safety gate}{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Trust and policy plane.}{9}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Fast edge enforcement plane.}{9}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Backhaul and gateway plane.}{9}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Telemetry, optimisation, and survivability plane.}{9}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}Fast Path, Slow Path, and Control Epochs}{9}{section.3.3}\protected@file@percent }
+\newlabel{sec:timescales}{{3.3}{9}{Fast Path, Slow Path, and Control Epochs}{section.3.3}{}}
+\newlabel{eq:timescale-sep}{{3.1}{9}{Fast Path, Slow Path, and Control Epochs}{equation.3.3.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces Control-plane split and temporal responsibilities.}}{10}{table.caption.10}\protected@file@percent }
+\newlabel{tab:control-split}{{3.1}{10}{Control-plane split and temporal responsibilities}{table.caption.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}Commodity Edge Resource Budget}{10}{section.3.4}\protected@file@percent }
+\newlabel{sec:edge-budget}{{3.4}{10}{Commodity Edge Resource Budget}{section.3.4}{}}
+\newlabel{eq:resource-vector}{{3.2}{10}{Commodity Edge Resource Budget}{equation.3.4.2}{}}
+\newlabel{eq:edge-resource-ceiling}{{3.3}{10}{Commodity Edge Resource Budget}{equation.3.4.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}Driver Buffer Admission Heuristic}{10}{subsection.3.4.1}\protected@file@percent }
+\newlabel{sec:ring-buffer}{{3.4.1}{10}{Driver Buffer Admission Heuristic}{subsection.3.4.1}{}}
+\newlabel{eq:ring-buffer}{{3.4}{10}{Driver Buffer Admission Heuristic}{equation.3.4.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.5}Edge Survivability Under Local Isolation}{11}{section.3.5}\protected@file@percent }
+\newlabel{sec:survivability}{{3.5}{11}{Edge Survivability Under Local Isolation}{section.3.5}{}}
+\newlabel{eq:hmac-token}{{3.6}{11}{Edge Survivability Under Local Isolation}{equation.3.5.6}{}}
+\newlabel{eq:hmac-cpu-criterion}{{3.7}{11}{Edge Survivability Under Local Isolation}{equation.3.5.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.6}Normalised LEO Control Backoff}{11}{section.3.6}\protected@file@percent }
+\newlabel{sec:leo-backoff}{{3.6}{11}{Normalised LEO Control Backoff}{section.3.6}{}}
+\newlabel{eq:clip-definition}{{3.8}{11}{Normalised LEO Control Backoff}{equation.3.6.8}{}}
+\newlabel{eq:leo-backoff-clean}{{3.9}{11}{Normalised LEO Control Backoff}{equation.3.6.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.7}Systems Verification Matrix}{12}{section.3.7}\protected@file@percent }
+\newlabel{sec:verification}{{3.7}{12}{Systems Verification Matrix}{section.3.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces Systems verification and boundary performance matrix.}}{12}{table.caption.11}\protected@file@percent }
+\newlabel{tab:verification}{{3.2}{12}{Systems verification and boundary performance matrix}{table.caption.11}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Formal Mathematical Model}{13}{chapter.4}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\newlabel{ch:math}{{4}{13}{Formal Mathematical Model}{chapter.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}System Variables}{13}{section.4.1}\protected@file@percent }
+\newlabel{sec:sysvars}{{4.1}{13}{System Variables}{section.4.1}{}}
+\newlabel{eq:subscriber-vector}{{4.1}{13}{System Variables}{equation.4.1.1}{}}
+\newlabel{eq:ap-vector}{{4.2}{13}{System Variables}{equation.4.1.2}{}}
+\newlabel{eq:assignment-vars}{{4.3}{13}{System Variables}{equation.4.1.3}{}}
+\newlabel{eq:valid-session}{{4.4}{13}{System Variables}{equation.4.1.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.1}Notation, Parameter Selection, and Normalisation Convention}{14}{subsection.4.1.1}\protected@file@percent }
+\newlabel{sec:notation-parameter-policy}{{4.1.1}{14}{Notation, Parameter Selection, and Normalisation Convention}{subsection.4.1.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.1}{\ignorespaces Additional notation and parameter-selection conventions.}}{14}{table.caption.12}\protected@file@percent }
+\newlabel{tab:parameter_conventions}{{4.1}{14}{Additional notation and parameter-selection conventions}{table.caption.12}{}}
+\newlabel{eq:token-rotation-bound}{{4.5}{14}{Notation, Parameter Selection, and Normalisation Convention}{equation.4.1.5}{}}
+\newlabel{eq:delta-min-default}{{4.6}{15}{Notation, Parameter Selection, and Normalisation Convention}{equation.4.1.6}{}}
+\newlabel{eq:delta-min-sensitivity}{{4.7}{15}{Notation, Parameter Selection, and Normalisation Convention}{equation.4.1.7}{}}
+\newlabel{eq:beta-normalisation}{{4.8}{15}{Notation, Parameter Selection, and Normalisation Convention}{equation.4.1.8}{}}
+\newlabel{eq:omega-normalisation}{{4.9}{15}{Notation, Parameter Selection, and Normalisation Convention}{equation.4.1.9}{}}
+\newlabel{eq:psi-normalisation}{{4.10}{15}{Notation, Parameter Selection, and Normalisation Convention}{equation.4.1.10}{}}
+\newlabel{eq:zeta-normalisation}{{4.11}{15}{Notation, Parameter Selection, and Normalisation Convention}{equation.4.1.11}{}}
+\newlabel{eq:kappa-nonnegative}{{4.12}{15}{Notation, Parameter Selection, and Normalisation Convention}{equation.4.1.12}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Finite Implementation Queue and Auxiliary LDT Queue}{15}{section.4.2}\protected@file@percent }
+\newlabel{sec:queue-split}{{4.2}{15}{Finite Implementation Queue and Auxiliary LDT Queue}{section.4.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.1}Finite Drop-Tail Implementation Model}{16}{subsection.4.2.1}\protected@file@percent }
+\newlabel{sec:finite-queue}{{4.2.1}{16}{Finite Drop-Tail Implementation Model}{subsection.4.2.1}{}}
+\newlabel{eq:effective-service}{{4.13}{16}{Finite Drop-Tail Implementation Model}{equation.4.2.13}{}}
+\newlabel{eq:finite-queue-sde}{{4.14}{16}{Finite Drop-Tail Implementation Model}{equation.4.2.14}{}}
+\newlabel{eq:flux}{{4.15}{16}{Finite Drop-Tail Implementation Model}{equation.4.2.15}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.2}Diffusion Coefficient Estimation}{16}{subsection.4.2.2}\protected@file@percent }
+\newlabel{sec:diffusion}{{4.2.2}{16}{Diffusion Coefficient Estimation}{subsection.4.2.2}{}}
+\newlabel{eq:macro-epoch}{{4.16}{16}{Diffusion Coefficient Estimation}{equation.4.2.16}{}}
+\newlabel{eq:diffusion-estimator}{{4.17}{16}{Diffusion Coefficient Estimation}{equation.4.2.17}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Large Deviations Bound for the Auxiliary Infinite Queue}{17}{section.4.3}\protected@file@percent }
+\newlabel{sec:ldt}{{4.3}{17}{Large Deviations Bound for the Auxiliary Infinite Queue}{section.4.3}{}}
+\newlabel{eq:virtual-tail-probability}{{4.18}{17}{Large Deviations Bound for the Auxiliary Infinite Queue}{equation.4.3.18}{}}
+\newlabel{eq:eff-bw-def}{{4.19}{17}{Large Deviations Bound for the Auxiliary Infinite Queue}{equation.4.3.19}{}}
+\newlabel{eq:sup-root}{{4.20}{17}{Large Deviations Bound for the Auxiliary Infinite Queue}{equation.4.3.20}{}}
+\newlabel{eq:root-conditional}{{4.21}{17}{Large Deviations Bound for the Auxiliary Infinite Queue}{equation.4.3.21}{}}
+\newlabel{eq:ldt-asymptotic}{{4.22}{17}{Large Deviations Bound for the Auxiliary Infinite Queue}{equation.4.3.22}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}Hard Safety Feasibility and State-Dependent Safe Actions}{18}{section.4.4}\protected@file@percent }
+\newlabel{sec:pisafe}{{4.4}{18}{Hard Safety Feasibility and State-Dependent Safe Actions}{section.4.4}{}}
+\newlabel{eq:usafe-state}{{4.23}{18}{State-dependent safe action set}{equation.4.4.23}{}}
+\newlabel{eq:edge-feasibility}{{4.24}{18}{Hard Safety Feasibility and State-Dependent Safe Actions}{equation.4.4.24}{}}
+\newlabel{eq:pisafe-corrected}{{4.25}{18}{Safe policy set}{equation.4.4.25}{}}
+\newlabel{eq:single-ap}{{4.26}{18}{Hard Safety Feasibility and State-Dependent Safe Actions}{equation.4.4.26}{}}
+\newlabel{eq:auth-req}{{4.27}{18}{Hard Safety Feasibility and State-Dependent Safe Actions}{equation.4.4.27}{}}
+\newlabel{eq:policy-req}{{4.28}{18}{Hard Safety Feasibility and State-Dependent Safe Actions}{equation.4.4.28}{}}
+\newlabel{eq:capacity}{{4.29}{18}{Hard Safety Feasibility and State-Dependent Safe Actions}{equation.4.4.29}{}}
+\newlabel{eq:qos}{{4.30}{18}{Hard Safety Feasibility and State-Dependent Safe Actions}{equation.4.4.30}{}}
+\citation{itu-p838,itu-p618}
+\@writefile{toc}{\contentsline {section}{\numberline {4.5}Interference Graph and Edge-Aware Attention}{19}{section.4.5}\protected@file@percent }
+\newlabel{sec:interference-graph}{{4.5}{19}{Interference Graph and Edge-Aware Attention}{section.4.5}{}}
+\newlabel{eq:edge-feature-graph}{{4.31}{19}{Interference Graph and Edge-Aware Attention}{equation.4.5.31}{}}
+\newlabel{eq:edge-weight}{{4.32}{19}{Interference Graph and Edge-Aware Attention}{equation.4.5.32}{}}
+\newlabel{eq:edge-feature-normalisation}{{4.33}{19}{Interference Graph and Edge-Aware Attention}{equation.4.5.33}{}}
+\newlabel{eq:edge-aware-attention}{{4.34}{19}{Interference Graph and Edge-Aware Attention}{equation.4.5.34}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.6}Physics-Informed Path-Loss Scope}{19}{section.4.6}\protected@file@percent }
+\newlabel{sec:pinn}{{4.6}{19}{Physics-Informed Path-Loss Scope}{section.4.6}{}}
+\newlabel{eq:multiwall}{{4.35}{19}{Physics-Informed Path-Loss Scope}{equation.4.6.35}{}}
+\newlabel{eq:pinn-loss}{{4.36}{19}{Physics-Informed Path-Loss Scope}{equation.4.6.36}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.7}Consistent Cost-Minimisation CMDP}{20}{section.4.7}\protected@file@percent }
+\newlabel{sec:cmdp}{{4.7}{20}{Consistent Cost-Minimisation CMDP}{section.4.7}{}}
+\newlabel{eq:cmdp}{{4.37}{20}{Consistent Cost-Minimisation CMDP}{equation.4.7.37}{}}
+\newlabel{eq:bellman-corrected}{{4.38}{20}{Consistent Cost-Minimisation CMDP}{equation.4.7.38}{}}
+\newlabel{eq:cost-function}{{4.39}{20}{Consistent Cost-Minimisation CMDP}{equation.4.7.39}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.2}{\ignorespaces Operational definitions of CMDP cost terms.}}{21}{table.caption.13}\protected@file@percent }
+\newlabel{tab:cmdp-cost-terms}{{4.2}{21}{Operational definitions of CMDP cost terms}{table.caption.13}{}}
+\newlabel{eq:reward-negative-cost}{{4.40}{21}{Consistent Cost-Minimisation CMDP}{equation.4.7.40}{}}
+\newlabel{eq:jain}{{4.41}{21}{Consistent Cost-Minimisation CMDP}{equation.4.7.41}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.8}LEO Backhaul Resilience Cost}{21}{section.4.8}\protected@file@percent }
+\newlabel{sec:leo-model}{{4.8}{21}{LEO Backhaul Resilience Cost}{section.4.8}{}}
+\newlabel{eq:bh-eff}{{4.42}{21}{LEO Backhaul Resilience Cost}{equation.4.8.42}{}}
+\newlabel{eq:leo-cost}{{4.43}{21}{LEO Backhaul Resilience Cost}{equation.4.8.43}{}}
+\newlabel{eq:energy-cost}{{4.44}{22}{LEO Backhaul Resilience Cost}{equation.4.8.44}{}}
+\newlabel{eq:bh-selector}{{4.45}{22}{LEO Backhaul Resilience Cost}{equation.4.8.45}{}}
+\citation{hevner2004design}
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}Methodology and Evaluation Framework}{23}{chapter.5}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\newlabel{ch:methodology}{{5}{23}{Methodology and Evaluation Framework}{chapter.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.1}Research Design}{23}{section.5.1}\protected@file@percent }
+\newlabel{sec:design}{{5.1}{23}{Research Design}{section.5.1}{}}
+\gdef \LT@i {\LT@entry 
+    {1}{97.35826pt}\LT@entry 
+    {1}{159.95424pt}\LT@entry 
+    {1}{154.26378pt}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}Dataset Design}{24}{section.5.2}\protected@file@percent }
+\newlabel{sec:dataset}{{5.2}{24}{Dataset Design}{section.5.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Dataset matrices, variables, and analytical role.}}{24}{table.5.1}\protected@file@percent }
+\newlabel{tab:dataset}{{5.1}{24}{Dataset matrices, variables, and analytical role}{table.5.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.3}Data-Plane Tooling Hierarchy}{25}{section.5.3}\protected@file@percent }
+\newlabel{sec:edge-tooling}{{5.3}{25}{Data-Plane Tooling Hierarchy}{section.5.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.4}System-Level Telemetry Throttle}{25}{section.5.4}\protected@file@percent }
+\newlabel{sec:telemetry}{{5.4}{25}{System-Level Telemetry Throttle}{section.5.4}{}}
+\newlabel{eq:system-telemetry-throttle-clean}{{5.1}{25}{System-Level Telemetry Throttle}{equation.5.4.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.5}Experimental Baselines}{25}{section.5.5}\protected@file@percent }
+\newlabel{sec:baselines}{{5.5}{25}{Experimental Baselines}{section.5.5}{}}
+\newlabel{eq:acceptance-rule-clean}{{5.2}{26}{Experimental Baselines}{equation.5.5.2}{}}
+\newlabel{eq:composite-score}{{5.3}{26}{Experimental Baselines}{equation.5.5.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.6}Ablation Study Plan}{26}{section.5.6}\protected@file@percent }
+\newlabel{sec:ablation}{{5.6}{26}{Ablation Study Plan}{section.5.6}{}}
+\newlabel{eq:ablation}{{5.4}{26}{Ablation Study Plan}{equation.5.6.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.7}Evaluation Metrics}{27}{section.5.7}\protected@file@percent }
+\newlabel{sec:metrics}{{5.7}{27}{Evaluation Metrics}{section.5.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Metric-to-research-question alignment.}}{27}{table.caption.14}\protected@file@percent }
+\newlabel{tab:metrics}{{5.2}{27}{Metric-to-research-question alignment}{table.caption.14}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.8}Statistical Analysis Plan}{27}{section.5.8}\protected@file@percent }
+\newlabel{sec:stats}{{5.8}{27}{Statistical Analysis Plan}{section.5.8}{}}
+\newlabel{eq:treatment-effect}{{5.5}{27}{Statistical Analysis Plan}{equation.5.8.5}{}}
+\newlabel{eq:mixed-effects}{{5.6}{27}{Statistical Analysis Plan}{equation.5.8.6}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {6}Implementation Blueprints and Core Algorithms}{28}{chapter.6}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\newlabel{ch:impl}{{6}{28}{Implementation Blueprints and Core Algorithms}{chapter.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.1}Authentication and Slice Assignment}{28}{section.6.1}\protected@file@percent }
+\newlabel{sec:alg-auth}{{6.1}{28}{Authentication and Slice Assignment}{section.6.1}{}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces Safety-Constrained Subscriber Authentication and Slice Assignment}}{28}{algocf.1}\protected@file@percent }
+\newlabel{alg:auth-slice}{{1}{28}{Authentication and Slice Assignment}{algocf.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.2}Backhaul Selection}{29}{section.6.2}\protected@file@percent }
+\newlabel{sec:alg-backhaul}{{6.2}{29}{Backhaul Selection}{section.6.2}{}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {2}{\ignorespaces Safety-First Backhaul Selection}}{29}{algocf.2}\protected@file@percent }
+\newlabel{alg:backhaul}{{2}{29}{Backhaul Selection}{algocf.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.3}Edge Survivability and Token Cache}{29}{section.6.3}\protected@file@percent }
+\newlabel{sec:alg-surv}{{6.3}{29}{Edge Survivability and Token Cache}{section.6.3}{}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {3}{\ignorespaces Cached Token Verification and Offline Accounting}}{29}{algocf.3}\protected@file@percent }
+\newlabel{alg:survivability}{{3}{29}{Edge Survivability and Token Cache}{algocf.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.4}Algorithmic Complexity and Control Overhead}{30}{section.6.4}\protected@file@percent }
+\newlabel{sec:algorithmic-overhead}{{6.4}{30}{Algorithmic Complexity and Control Overhead}{section.6.4}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {7}Expected Outcomes, Risk Mitigation, and Research Plan}{31}{chapter.7}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{loa}{\addvspace {10\p@ }}
+\newlabel{ch:outcomes}{{7}{31}{Expected Outcomes, Risk Mitigation, and Research Plan}{chapter.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.1}Expected Outcomes}{31}{section.7.1}\protected@file@percent }
+\newlabel{sec:outcomes}{{7.1}{31}{Expected Outcomes}{section.7.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7.1}{\ignorespaces Research contributions mapped to objectives and questions.}}{31}{table.caption.15}\protected@file@percent }
+\newlabel{tab:contributions}{{7.1}{31}{Research contributions mapped to objectives and questions}{table.caption.15}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.2}Validity Strategy}{32}{section.7.2}\protected@file@percent }
+\newlabel{sec:validity}{{7.2}{32}{Validity Strategy}{section.7.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.3}Reproducibility}{32}{section.7.3}\protected@file@percent }
+\newlabel{sec:reproducibility}{{7.3}{32}{Reproducibility}{section.7.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.4}Ethical and Security Considerations}{32}{section.7.4}\protected@file@percent }
+\newlabel{sec:ethics}{{7.4}{32}{Ethical and Security Considerations}{section.7.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.5}Risk Register}{33}{section.7.5}\protected@file@percent }
+\newlabel{sec:risks}{{7.5}{33}{Risk Register}{section.7.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7.2}{\ignorespaces Reviewer and implementation risk register with mitigation plan.}}{33}{table.caption.16}\protected@file@percent }
+\newlabel{tab:risks}{{7.2}{33}{Reviewer and implementation risk register with mitigation plan}{table.caption.16}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.6}Work Plan and Timeline}{34}{section.7.6}\protected@file@percent }
+\newlabel{sec:timeline}{{7.6}{34}{Work Plan and Timeline}{section.7.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7.3}{\ignorespaces Proposed research timeline with explicit deliverables.}}{34}{table.caption.17}\protected@file@percent }
+\newlabel{tab:timeline}{{7.3}{34}{Proposed research timeline with explicit deliverables}{table.caption.17}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.7}Limitations}{34}{section.7.7}\protected@file@percent }
+\newlabel{sec:limitations}{{7.7}{34}{Limitations}{section.7.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.8}Conclusion}{35}{section.7.8}\protected@file@percent }
+\newlabel{sec:conclusion}{{7.8}{35}{Conclusion}{section.7.8}{}}
+\bibcite{ieee8021x}{{1}{}{{}}{{}}}
+\bibcite{rfc6614}{{2}{}{{}}{{}}}
+\bibcite{rfc9190}{{3}{}{{}}{{}}}
+\bibcite{rfc7542}{{4}{}{{}}{{}}}
+\bibcite{rfc7593}{{5}{}{{}}{{}}}
+\bibcite{rfc7348}{{6}{}{{}}{{}}}
+\bibcite{passpoint2024}{{7}{}{{}}{{}}}
+\bibcite{wba-openroaming}{{8}{}{{}}{{}}}
+\bibcite{3gpp-ts23501}{{9}{}{{}}{{}}}
+\bibcite{etsi-mec002}{{10}{}{{}}{{}}}
+\bibcite{hoiland2018xdp}{{11}{}{{}}{{}}}
+\bibcite{wireguard2017}{{12}{}{{}}{{}}}
+\bibcite{openwrt2024}{{13}{}{{}}{{}}}
+\bibcite{kipf2017gcn}{{14}{}{{}}{{}}}
+\bibcite{velickovic2018gat}{{15}{}{{}}{{}}}
+\bibcite{shen2021gnn}{{16}{}{{}}{{}}}
+\bibcite{raissi2019pinn}{{17}{}{{}}{{}}}
+\bibcite{schulman2017ppo}{{18}{}{{}}{{}}}
+\bibcite{altman1999cmdp}{{19}{}{{}}{{}}}
+\bibcite{jain1984}{{20}{}{{}}{{}}}
+\bibcite{kelly1996}{{21}{}{{}}{{}}}
+\bibcite{shwartz1995}{{22}{}{{}}{{}}}
+\bibcite{itu-p838}{{23}{}{{}}{{}}}
+\bibcite{itu-p618}{{24}{}{{}}{{}}}
+\bibcite{mohan2023starlink}{{25}{}{{}}{{}}}
+\bibcite{ullah2025starlink}{{26}{}{{}}{{}}}
+\bibcite{wu2024handover}{{27}{}{{}}{{}}}
+\bibcite{worldbank-digitalnepal2022}{{28}{}{{}}{{}}}
+\bibcite{nta-mis2024}{{29}{}{{}}{{}}}
+\bibcite{hevner2004design}{{30}{}{{}}{{}}}
+\providecommand\NAT@force@numbers{}\NAT@force@numbers
+\gdef \@abspage@last{45}

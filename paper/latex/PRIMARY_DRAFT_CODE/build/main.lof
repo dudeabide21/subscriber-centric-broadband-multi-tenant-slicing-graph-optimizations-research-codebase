@@ -1,0 +1,8 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Clean layered subscriber-centric broadband architecture. The packet fast path remains local at the edge AP, while the GNN/CMDP block only issues slow macro-policy updates. Optional LEO backhaul is isolated to the backhaul plane and cannot bypass the safety gate.}}{9}{figure.caption.5}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
