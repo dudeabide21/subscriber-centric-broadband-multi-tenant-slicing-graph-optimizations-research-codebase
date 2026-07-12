@@ -22,3 +22,4 @@ This is an exponential-order risk indicator, not a calibrated finite-buffer prob
 
 ## Graph edge feature normalization
 `x_bar = (x - min(x)) / (max(x) - min(x) + eps)`
+
