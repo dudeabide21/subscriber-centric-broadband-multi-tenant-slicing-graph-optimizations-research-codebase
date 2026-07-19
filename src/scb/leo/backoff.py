@@ -1,79 +1,349 @@
-"""LEO backoff control helpers.
+"""LEO-specific macro-epoch backoff equation code mirror.
 
-Formula:
-    Delta_t_eff_LEO = clip_[Delta_t_macro, Delta_t_max](
-        Delta_t_macro * exp(
-            psi1 * sigma2_RTT / (sigma2_RTT_ref + eps)
-            + psi2 * Drop_LEO / (Drop_ref + eps)
-        )
-    )
+This module computes the Draft 10 LEO macro-epoch interval. It does not
+collect metrics, select a backhaul path, or bypass safety filtering.
 
-Units:
-    * ``delta_t_macro`` and ``delta_t_max`` are in seconds.
-    * ``sigma2_rtt`` and ``sigma2_rtt_ref`` are RTT-variance surrogates in
-      squared milliseconds or an equivalent consistent variance unit.
-    * ``drop_leo`` and ``drop_ref`` are dimensionless loss ratios.
-    * ``psi1`` and ``psi2`` are dimensionless sensitivity weights.
-
-Assumptions:
-    * The expression is a research control heuristic, not a validated network
-      control law.
-    * The clipped delay must stay within ``[delta_t_macro, delta_t_max]``.
-    * ``delta_t_macro`` is positive, ``delta_t_max`` is at least
-      ``delta_t_macro``, and reference denominators are stabilized by
-      ``EPS`` to avoid division by zero.
-
-Failure cases:
-    * Non-positive ``delta_t_macro`` or ``delta_t_max`` raises
-      :class:`ValueError`.
-    * ``delta_t_max < delta_t_macro`` raises :class:`ValueError`.
+``kappa_rtt`` and ``kappa_drop`` are non-negative sensitivity coefficients,
+not simplex weights.
 """
 
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
+from numbers import Real
 
-from scb.common.constants import EPS
+from scb.common.weights import (
+    validate_nonnegative_sensitivities,
+)
+
+
+@dataclass(frozen=True)
+class LeoBackoffReport:
+    """Validated LEO macro-epoch backoff calculation."""
+
+    delta_t_eff: float
+    raw_interval: float
+    rtt_variability_term: float
+    drop_term: float
+    exponent: float
+    clamped: bool
+
+
+@dataclass(frozen=True)
+class _LeoBackoffCalculation:
+    """Internal result shared by public backoff helpers."""
+
+    delta_t_eff: float
+    raw_interval: float
+    rtt_variability_term: float
+    drop_term: float
+    exponent: float
+    clamped: bool
+
+
+def _coerce_finite_real(
+    value: Real,
+    *,
+    name: str,
+) -> float:
+    """Convert one real numeric input to a finite built-in float."""
+    if isinstance(value, bool) or not isinstance(value, Real):
+        raise ValueError(
+            f"{name} must be a real numeric value"
+        )
+
+    try:
+        converted = float(value)
+    except (OverflowError, TypeError, ValueError):
+        raise ValueError(
+            f"{name} must be finite"
+        ) from None
+
+    if not math.isfinite(converted):
+        raise ValueError(
+            f"{name} must be finite"
+        )
+
+    return converted
+
+
+def _validate_nonnegative(
+    value: Real,
+    *,
+    name: str,
+) -> float:
+    """Validate a finite value greater than or equal to zero."""
+    converted = _coerce_finite_real(
+        value,
+        name=name,
+    )
+
+    if converted < 0.0:
+        raise ValueError(
+            f"{name} must be non-negative"
+        )
+
+    return converted
+
+
+def _validate_positive(
+    value: Real,
+    *,
+    name: str,
+) -> float:
+    """Validate a finite value strictly greater than zero."""
+    converted = _coerce_finite_real(
+        value,
+        name=name,
+    )
+
+    if converted <= 0.0:
+        raise ValueError(
+            f"{name} must be greater than zero"
+        )
+
+    return converted
+
+
+def _validate_sensitivities(
+    kappa_rtt: Real,
+    kappa_drop: Real,
+) -> tuple[float, float]:
+    """Validate two non-negative, non-simplex sensitivities."""
+    validated = tuple(
+        validate_nonnegative_sensitivities(
+            (
+                kappa_rtt,
+                kappa_drop,
+            )
+        )
+    )
+
+    if len(validated) != 2:
+        raise ValueError(
+            "exactly two LEO backoff sensitivities "
+            "are required"
+        )
+
+    return validated[0], validated[1]
+
+
+def _calculate_leo_backoff(
+    delta_t_macro: Real,
+    delta_t_max: Real,
+    sigma_rtt_sq: Real,
+    sigma_rtt_ref_sq: Real,
+    drop_leo: Real,
+    drop_ref: Real,
+    kappa_rtt: Real,
+    kappa_drop: Real,
+    *,
+    epsilon: Real,
+) -> _LeoBackoffCalculation:
+    """Validate inputs and calculate the LEO backoff equation."""
+    base = _validate_positive(
+        delta_t_macro,
+        name="delta_t_macro",
+    )
+    maximum = _validate_positive(
+        delta_t_max,
+        name="delta_t_max",
+    )
+
+    if maximum < base:
+        raise ValueError(
+            "delta_t_max must be greater than or equal "
+            "to delta_t_macro"
+        )
+
+    sigma = _validate_nonnegative(
+        sigma_rtt_sq,
+        name="sigma_rtt_sq",
+    )
+    sigma_reference = _validate_positive(
+        sigma_rtt_ref_sq,
+        name="sigma_rtt_ref_sq",
+    )
+    drop = _validate_nonnegative(
+        drop_leo,
+        name="drop_leo",
+    )
+    reference_drop = _validate_positive(
+        drop_ref,
+        name="drop_ref",
+    )
+
+    validated_kappa_rtt, validated_kappa_drop = (
+        _validate_sensitivities(
+            kappa_rtt,
+            kappa_drop,
+        )
+    )
+
+    validated_epsilon = _validate_positive(
+        epsilon,
+        name="epsilon",
+    )
+
+    rtt_variability_term = (
+        sigma
+        / (
+            sigma_reference
+            + validated_epsilon
+        )
+    )
+    drop_term = (
+        drop
+        / (
+            reference_drop
+            + validated_epsilon
+        )
+    )
+
+    rtt_contribution = (
+        validated_kappa_rtt
+        * rtt_variability_term
+    )
+    drop_contribution = (
+        validated_kappa_drop
+        * drop_term
+    )
+
+    # There are only two non-negative terms. Ordinary addition is
+    # intentional because math.fsum may raise intermediate overflow
+    # for very large finite sensitivities.
+    exponent = (
+        rtt_contribution
+        + drop_contribution
+    )
+
+    try:
+        raw_interval = (
+            base
+            * math.exp(exponent)
+        )
+    except OverflowError:
+        raw_interval = math.inf
+
+    delta_t_eff = min(
+        maximum,
+        max(
+            base,
+            raw_interval,
+        ),
+    )
+
+    return _LeoBackoffCalculation(
+        delta_t_eff=float(delta_t_eff),
+        raw_interval=float(raw_interval),
+        rtt_variability_term=float(
+            rtt_variability_term
+        ),
+        drop_term=float(drop_term),
+        exponent=float(exponent),
+        clamped=(
+            raw_interval < base
+            or raw_interval > maximum
+        ),
+    )
+
+
+def leo_macro_epoch_backoff(
+    delta_t_macro: Real,
+    delta_t_max: Real,
+    sigma_rtt_sq: Real,
+    sigma_rtt_ref_sq: Real,
+    drop_leo: Real,
+    drop_ref: Real,
+    kappa_rtt: Real,
+    kappa_drop: Real,
+    *,
+    epsilon: Real = 1e-9,
+) -> float:
+    """Return the clamped Draft 10 LEO macro-epoch interval.
+
+    ``kappa_rtt`` and ``kappa_drop`` are non-negative sensitivity
+    coefficients. They are not simplex weights and are not required
+    to sum to one.
+    """
+    return _calculate_leo_backoff(
+        delta_t_macro,
+        delta_t_max,
+        sigma_rtt_sq,
+        sigma_rtt_ref_sq,
+        drop_leo,
+        drop_ref,
+        kappa_rtt,
+        kappa_drop,
+        epsilon=epsilon,
+    ).delta_t_eff
+
+
+def leo_backoff_report(
+    delta_t_macro: Real,
+    delta_t_max: Real,
+    sigma_rtt_sq: Real,
+    sigma_rtt_ref_sq: Real,
+    drop_leo: Real,
+    drop_ref: Real,
+    kappa_rtt: Real,
+    kappa_drop: Real,
+    *,
+    epsilon: Real = 1e-9,
+) -> LeoBackoffReport:
+    """Return the interval and dimensionless backoff terms."""
+    calculation = _calculate_leo_backoff(
+        delta_t_macro,
+        delta_t_max,
+        sigma_rtt_sq,
+        sigma_rtt_ref_sq,
+        drop_leo,
+        drop_ref,
+        kappa_rtt,
+        kappa_drop,
+        epsilon=epsilon,
+    )
+
+    return LeoBackoffReport(
+        delta_t_eff=calculation.delta_t_eff,
+        raw_interval=calculation.raw_interval,
+        rtt_variability_term=(
+            calculation.rtt_variability_term
+        ),
+        drop_term=calculation.drop_term,
+        exponent=calculation.exponent,
+        clamped=calculation.clamped,
+    )
 
 
 def leo_backoff_delay(
     *,
-    delta_t_macro: float,
-    sigma2_rtt: float,
-    sigma2_rtt_ref: float,
-    drop_leo: float,
-    drop_ref: float,
-    psi1: float,
-    psi2: float,
-    delta_t_max: float,
+    delta_t_macro: Real,
+    sigma2_rtt: Real,
+    sigma2_rtt_ref: Real,
+    drop_leo: Real,
+    drop_ref: Real,
+    psi1: Real,
+    psi2: Real,
+    delta_t_max: Real,
 ) -> float:
-    """Return the clipped LEO backoff delay in seconds.
+    """Compatibility wrapper for the pre-Draft-10 repository API.
 
-    Args:
-        delta_t_macro: Baseline delay in seconds.
-        sigma2_rtt: Observed RTT variance surrogate.
-        sigma2_rtt_ref: Reference RTT variance surrogate.
-        drop_leo: Observed LEO drop ratio.
-        drop_ref: Reference drop ratio.
-        psi1: RTT-variance sensitivity coefficient.
-        psi2: Drop-ratio sensitivity coefficient.
-        delta_t_max: Maximum allowed delay in seconds.
+    ``psi1`` and ``psi2`` are accepted only as historical parameter
+    names and are forwarded internally as ``kappa_rtt`` and
+    ``kappa_drop``.
 
-    Returns:
-        A delay in seconds clipped to ``[delta_t_macro, delta_t_max]``.
-
-    Raises:
-        ValueError: If the delay bounds are invalid.
+    New code must call :func:`leo_macro_epoch_backoff` with the
+    corrected Draft 10 sensitivity names.
     """
-
-    if delta_t_macro <= 0:
-        raise ValueError("delta_t_macro must be positive")
-    if delta_t_max <= 0:
-        raise ValueError("delta_t_max must be positive")
-    if delta_t_max < delta_t_macro:
-        raise ValueError("delta_t_max must be greater than or equal to delta_t_macro")
-
-    scaled_delay = delta_t_macro * math.exp(
-        psi1 * sigma2_rtt / (sigma2_rtt_ref + EPS) + psi2 * drop_leo / (drop_ref + EPS)
+    return leo_macro_epoch_backoff(
+        delta_t_macro=delta_t_macro,
+        delta_t_max=delta_t_max,
+        sigma_rtt_sq=sigma2_rtt,
+        sigma_rtt_ref_sq=sigma2_rtt_ref,
+        drop_leo=drop_leo,
+        drop_ref=drop_ref,
+        kappa_rtt=psi1,
+        kappa_drop=psi2,
     )
-    return min(max(scaled_delay, delta_t_macro), delta_t_max)
