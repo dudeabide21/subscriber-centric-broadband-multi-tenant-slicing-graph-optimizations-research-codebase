@@ -320,20 +320,19 @@ def leo_backoff_report(
 def leo_backoff_delay(
     *,
     delta_t_macro: Real,
+    delta_t_max: Real,
     sigma2_rtt: Real,
     sigma2_rtt_ref: Real,
     drop_leo: Real,
     drop_ref: Real,
     psi1: Real,
     psi2: Real,
-    delta_t_max: Real,
+
 ) -> float:
     """Compatibility wrapper for the pre-Draft-10 repository API.
 
     ``psi1`` and ``psi2`` are accepted only as historical parameter
-    names and are forwarded internally as ``kappa_rtt`` and
-    ``kappa_drop``.
-
+    names and are forwarded internally as ``kappa_rtt`` and    ``kappa_drop``.
     New code must call :func:`leo_macro_epoch_backoff` with the
     corrected Draft 10 sensitivity names.
     """
