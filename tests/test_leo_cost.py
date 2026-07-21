@@ -464,3 +464,79 @@ def test_cost_report_is_frozen_and_read_only() -> None:
 
     with pytest.raises(TypeError):
         report.weighted_terms["rtt"] = 1.0  # type: ignore[index]
+        
+def test_shuffled_psi_mapping_matches_canonical_tuple() -> None:
+    mapping = {
+        "energy": PSI[4],
+        "rtt": PSI[0],
+        "handover": PSI[3],
+        "jitter": PSI[1],
+        "outage": PSI[2],
+    }
+    terms = (
+        80.0,
+        100.0,
+        20.0,
+        50.0,
+        0.10,
+        0.20,
+        0.25,
+    )
+
+    assert leo_resilience_cost(
+        *terms,
+        mapping,
+    ) == pytest.approx(
+        leo_resilience_cost(
+            *terms,
+            PSI,
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    "mapping",
+    [
+        {
+            "rtt": 1.0,
+        },
+        {
+            "rtt": 1.0,
+            "jitter": 0.0,
+            "outage": 0.0,
+            "handover": 0.0,
+            "energy": 0.0,
+            "unknown": 0.0,
+        },
+    ],
+)
+def test_invalid_psi_mapping_keys_fail(
+    mapping: dict[str, float],
+) -> None:
+    with pytest.raises(ValueError):
+        leo_resilience_cost(
+            80.0,
+            100.0,
+            20.0,
+            50.0,
+            0.10,
+            0.20,
+            0.25,
+            mapping,
+        )
+
+
+def test_raw_leo_cost_can_exceed_one_without_clamping() -> None:
+    cost = leo_resilience_cost(
+        300.0,
+        100.0,
+        150.0,
+        50.0,
+        0.5,
+        0.5,
+        0.5,
+        PSI,
+    )
+
+    assert cost > 1.0
+    assert cost == pytest.approx(1.75)
