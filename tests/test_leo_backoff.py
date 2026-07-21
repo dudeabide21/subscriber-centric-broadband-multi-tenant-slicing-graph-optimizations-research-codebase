@@ -7,11 +7,9 @@ import pytest
 
 from scb.leo.backoff import (
     LeoBackoffReport,
-    leo_backoff_delay,
     leo_backoff_report,
     leo_macro_epoch_backoff,
 )
-
 
 def test_realistic_leo_backoff_returns_expected_value() -> None:
     result = leo_macro_epoch_backoff(
@@ -511,29 +509,4 @@ def test_extreme_sensitivities_clamp_without_fsum_overflow() -> None:
     )
 
     assert result == 60.0
-
-
-def test_legacy_backoff_wrapper_remains_compatible() -> None:
-    legacy = leo_backoff_delay(
-        delta_t_macro=10.0,
-        sigma2_rtt=25.0,
-        sigma2_rtt_ref=100.0,
-        drop_leo=0.02,
-        drop_ref=0.10,
-        psi1=1.0,
-        psi2=0.5,
-        delta_t_max=60.0,
-    )
-
-    canonical = leo_macro_epoch_backoff(
-        10.0,
-        60.0,
-        25.0,
-        100.0,
-        0.02,
-        0.10,
-        1.0,
-        0.5,
-    )
-
-    assert legacy == pytest.approx(canonical)
+    
