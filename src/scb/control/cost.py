@@ -21,6 +21,15 @@ from types import MappingProxyType
 
 from scb.common.weights import validate_omega_weights
 
+_OMEGA_ORDER = (
+    "interference",
+    "sla_violation",
+    "tunnel_overhead",
+    "edge_overhead",
+    "leo_overhead",
+    "throughput_norm",
+    "fairness",
+)
 
 @dataclass(frozen=True)
 class CmdpCostReport:
@@ -107,13 +116,31 @@ def _validate_omega(
     omega: Sequence[Real] | Mapping[object, Real],
 ) -> tuple[float, ...]:
     """Validate exactly seven convex CMDP weights without normalization."""
-    validated = tuple(validate_omega_weights(omega))
+    if isinstance(omega, Mapping):
+        if (
+            set(omega.keys()) != set(_OMEGA_ORDER)
+            or len(omega) != len(_OMEGA_ORDER)
+        ):
+            raise ValueError(
+                "omega mapping must contain exactly "
+                "the canonical seven keys"
+            )
 
-    if len(validated) != 7:
-        raise ValueError("omega must contain exactly seven weights")
+        ordered = tuple(
+            omega[name]
+            for name in _OMEGA_ORDER
+        )
+    else:
+        ordered = tuple(omega)
 
-    return validated
+    if len(ordered) != 7:
+        raise ValueError(
+            "omega must contain exactly seven weights"
+        )
 
+    return tuple(
+        validate_omega_weights(ordered)
+    )
 
 def _calculate_cmdp_cost(
     interference: Real,
