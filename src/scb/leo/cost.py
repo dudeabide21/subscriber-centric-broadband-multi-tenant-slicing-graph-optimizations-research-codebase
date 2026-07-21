@@ -15,6 +15,13 @@ from types import MappingProxyType
 
 from scb.common.weights import validate_psi_weights
 
+_PSI_ORDER = (
+    "rtt",
+    "jitter",
+    "outage",
+    "handover",
+    "energy",
+)
 
 @dataclass(frozen=True)
 class LeoCostReport:
@@ -114,23 +121,36 @@ def _validate_unit_interval(
 
     return converted
 
-
 def _validate_psi(
     psi: Sequence[Real] | Mapping[object, Real],
 ) -> tuple[float, ...]:
     """Validate exactly five convex LEO cost weights."""
-    validated = tuple(
-        validate_psi_weights(psi)
-    )
+    if isinstance(psi, Mapping):
+        if (
+            set(psi.keys()) != set(_PSI_ORDER)
+            or len(psi) != len(_PSI_ORDER)
+        ):
+            raise ValueError(
+                "psi mapping must contain exactly "
+                "the canonical five keys"
+            )
 
-    if len(validated) != 5:
+        ordered = tuple(
+            psi[name]
+            for name in _PSI_ORDER
+        )
+    else:
+        ordered = tuple(psi)
+
+    if len(ordered) != 5:
         raise ValueError(
             "psi must contain exactly five weights"
         )
 
-    return validated
-
-
+    return tuple(
+        validate_psi_weights(ordered)
+    )
+    
 def leo_energy_cost(
     pwr_avail: Real,
     pwr_max: Real,
@@ -278,9 +298,10 @@ def leo_resilience_cost(
 ) -> float:
     """Return the Draft 10 LEO/backhaul resilience cost.
 
-    ``psi`` contains five convex cost weights. This function computes
-    a cost only; it does not select a backhaul path or perform safety
-    filtering.
+    ``psi`` contains five convex cost weights. The returned value is the raw
+    dimensionless Eq. 4.43 ``C_LEO`` cost. RTT and jitter ratios may exceed
+    one, so the result may exceed one and is not clamped. It is not
+    automatically the normalized CMDP ``O_LEO`` term.
     """
     return _calculate_leo_resilience_cost(
         rtt,
