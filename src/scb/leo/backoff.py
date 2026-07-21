@@ -138,7 +138,6 @@ def _calculate_leo_backoff(
     drop_ref: Real,
     kappa_rtt: Real,
     kappa_drop: Real,
-    *,
     epsilon: Real,
 ) -> _LeoBackoffCalculation:
     """Validate inputs and calculate the LEO backoff equation."""
@@ -315,34 +314,4 @@ def leo_backoff_report(
         exponent=calculation.exponent,
         clamped=calculation.clamped,
     )
-
-
-def leo_backoff_delay(
-    *,
-    delta_t_macro: Real,
-    delta_t_max: Real,
-    sigma2_rtt: Real,
-    sigma2_rtt_ref: Real,
-    drop_leo: Real,
-    drop_ref: Real,
-    psi1: Real,
-    psi2: Real,
-
-) -> float:
-    """Compatibility wrapper for the pre-Draft-10 repository API.
-
-    ``psi1`` and ``psi2`` are accepted only as historical parameter
-    names and are forwarded internally as ``kappa_rtt`` and    ``kappa_drop``.
-    New code must call :func:`leo_macro_epoch_backoff` with the
-    corrected Draft 10 sensitivity names.
-    """
-    return leo_macro_epoch_backoff(
-        delta_t_macro=delta_t_macro,
-        delta_t_max=delta_t_max,
-        sigma_rtt_sq=sigma2_rtt,
-        sigma_rtt_ref_sq=sigma2_rtt_ref,
-        drop_leo=drop_leo,
-        drop_ref=drop_ref,
-        kappa_rtt=psi1,
-        kappa_drop=psi2,
-    )
+    
