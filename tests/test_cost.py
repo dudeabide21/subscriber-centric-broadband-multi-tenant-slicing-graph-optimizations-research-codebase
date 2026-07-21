@@ -711,3 +711,89 @@ def test_cost_report_contributions_are_read_only() -> None:
 
     with pytest.raises(TypeError):
         report.contributions["interference"] = 1.0  # type: ignore[index]
+        
+def test_shuffled_omega_mapping_matches_canonical_tuple() -> None:
+    mapping = {
+        "fairness": REALISTIC_OMEGA[6],
+        "interference": REALISTIC_OMEGA[0],
+        "leo_overhead": REALISTIC_OMEGA[4],
+        "sla_violation": REALISTIC_OMEGA[1],
+        "throughput_norm": REALISTIC_OMEGA[5],
+        "edge_overhead": REALISTIC_OMEGA[3],
+        "tunnel_overhead": REALISTIC_OMEGA[2],
+    }
+    terms = (
+        0.2,
+        0.1,
+        0.05,
+        0.3,
+        0.4,
+        0.8,
+        0.9,
+    )
+
+    assert cmdp_cost(
+        *terms,
+        mapping,
+    ) == pytest.approx(
+        cmdp_cost(
+            *terms,
+            REALISTIC_OMEGA,
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    "mapping",
+    [
+        {
+            "interference": 1.0,
+        },
+        {
+            "interference": 1.0,
+            "unknown": 0.0,
+        },
+        {
+            "interference": 1.0,
+            "sla_violation": 0.0,
+            "tunnel_overhead": 0.0,
+            "edge_overhead": 0.0,
+            "leo_overhead": 0.0,
+            "throughput_norm": 0.0,
+            "fairness": 0.0,
+            "unknown": 0.0,
+        },
+    ],
+)
+
+def test_invalid_omega_mapping_keys_fail(
+    mapping: dict[str, float],
+) -> None:
+    with pytest.raises(ValueError):
+        cmdp_cost(
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            mapping,
+        )
+
+
+def test_raw_leo_cost_above_one_is_rejected_as_cmdp_overhead() -> None:
+    with pytest.raises(
+        ValueError,
+        match="leo_overhead",
+    ):
+        cmdp_cost(
+            0,
+            0,
+            0,
+            0,
+            1.2,
+            0,
+            0,
+            REALISTIC_OMEGA,
+        )
