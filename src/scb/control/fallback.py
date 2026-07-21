@@ -138,38 +138,9 @@ def select_action_or_fallback(
     guest_policy_enabled: bool = False,
     degraded_bandwidth_cap: Real = 0.5,
 ) -> FallbackResult:
-    """Select the first safe action or apply deterministic fallback.
-
-    The caller must compute ``safe_actions`` before calling this function.
-    This function never fabricates an action and never bypasses the supplied
-    safe-action set.
-
-    When the safe-action set is empty:
-
-    * Online preserves only an explicitly feasible existing session.
-    * Degraded permits capped service only with a valid cached token and
-      requires signed offline accounting.
-    * Isolated permits only explicitly enabled guest-degraded local service.
-      Cached subscriber tokens do not grant subscriber service by default.
-    """
+    """Select the first safe action, otherwise apply branch-local fallback."""
     actions = _validate_safe_actions(safe_actions)
     state = _validate_state(survivability_state)
-
-    token_valid = _validate_flag(
-        cached_token_valid,
-        name="cached_token_valid",
-    )
-    session_feasible = _validate_flag(
-        existing_session_feasible,
-        name="existing_session_feasible",
-    )
-    guest_enabled = _validate_flag(
-        guest_policy_enabled,
-        name="guest_policy_enabled",
-    )
-    cap = _validate_bandwidth_cap(
-        degraded_bandwidth_cap
-    )
 
     if actions:
         return FallbackResult(
@@ -182,11 +153,14 @@ def select_action_or_fallback(
         )
 
     if state is SurvivabilityState.ONLINE:
+        session_feasible = _validate_flag(
+            existing_session_feasible,
+            name="existing_session_feasible",
+        )
+
         if session_feasible:
             return FallbackResult(
-                decision=(
-                    FallbackDecision.PRESERVE_EXISTING_SESSION
-                ),
+                decision=FallbackDecision.PRESERVE_EXISTING_SESSION,
                 reason=(
                     "no safe action exists; preserving an explicitly "
                     "feasible existing session"
@@ -202,11 +176,17 @@ def select_action_or_fallback(
         )
 
     if state is SurvivabilityState.DEGRADED:
+        token_valid = _validate_flag(
+            cached_token_valid,
+            name="cached_token_valid",
+        )
+        cap = _validate_bandwidth_cap(
+            degraded_bandwidth_cap
+        )
+
         if token_valid:
             return FallbackResult(
-                decision=(
-                    FallbackDecision.CAPPED_DEGRADED_SERVICE
-                ),
+                decision=FallbackDecision.CAPPED_DEGRADED_SERVICE,
                 reason=(
                     "no safe action exists; a valid cached token "
                     "permits capped degraded service"
@@ -222,6 +202,11 @@ def select_action_or_fallback(
                 "is available"
             ),
         )
+
+    guest_enabled = _validate_flag(
+        guest_policy_enabled,
+        name="guest_policy_enabled",
+    )
 
     if guest_enabled:
         return FallbackResult(
