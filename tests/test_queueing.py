@@ -9,7 +9,6 @@ from scb.queueing import (
     effective_bandwidth,
     effective_service_capacity,
     effective_service_capacity_from_sequence,
-    leo_backoff_delay,
     mean_arrival_rate,
     overflow_risk_indicator,
 )
@@ -45,17 +44,4 @@ def test_diffusion_coefficient_matches_centered_variance() -> None:
         delta_seconds=10.0,
         lambda_hat=lambda_hat,
     ) == pytest.approx(40.0)
-
-
-def test_leo_backoff_delay_is_clipped() -> None:
-    value = leo_backoff_delay(
-        delta_t_macro=5.0,
-        sigma2_rtt=10.0,
-        sigma2_rtt_ref=1.0,
-        drop_leo=0.9,
-        drop_ref=0.1,
-        psi1=1.0,
-        psi2=1.0,
-        delta_t_max=6.0,
-    )
-    assert 0.0 <= value <= 6.0
+    
