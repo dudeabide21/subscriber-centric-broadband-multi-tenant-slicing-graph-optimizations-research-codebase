@@ -1,6 +1,5 @@
 """Queueing, diffusion, and effective-bandwidth helpers."""
 
-from scb.leo import leo_backoff_delay
 from scb.queueing.diffusion_estimator import (
     diffusion_coefficient,
     mean_arrival_rate,
@@ -17,7 +16,6 @@ __all__ = [
     "effective_bandwidth",
     "effective_service_capacity",
     "effective_service_capacity_from_sequence",
-    "leo_backoff_delay",
     "mean_arrival_rate",
     "overflow_risk_indicator",
 ]
