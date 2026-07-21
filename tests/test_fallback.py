@@ -396,3 +396,36 @@ def test_full_survivability_state_matrix() -> None:
         )
 
         assert result.decision is expected
+
+
+def test_safe_action_bypasses_invalid_fallback_cap() -> None:
+    result = select_action_or_fallback(
+        ["safe-action"],
+        SurvivabilityState.ONLINE,
+        degraded_bandwidth_cap=0,
+    )
+
+    assert result.decision is FallbackDecision.USE_SAFE_ACTION
+    assert result.selected_action == "safe-action"
+
+
+def test_online_does_not_inspect_irrelevant_degraded_cap() -> None:
+    result = select_action_or_fallback(
+        [],
+        SurvivabilityState.ONLINE,
+        degraded_bandwidth_cap=0,
+    )
+
+    assert result.decision is FallbackDecision.REJECT_NEW_ADMISSION
+    assert result.selected_action is None
+
+
+def test_isolated_does_not_inspect_cached_token_flag() -> None:
+    result = select_action_or_fallback(
+        [],
+        SurvivabilityState.ISOLATED,
+        cached_token_valid=object(),  # type: ignore[arg-type]
+    )
+
+    assert result.decision is FallbackDecision.DENY_SUBSCRIBER_SERVICE
+    assert result.selected_action is None
