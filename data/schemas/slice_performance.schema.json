@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "slice_performance.schema.json",
+  "title": "Stage 2 Slice Performance Evidence",
+  "description": "Aggregate slice assignment, shaping, and performance evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_class": {
+      "type": "string",
+      "enum": [
+        "M",
+        "E",
+        "S",
+        "C"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subscriber_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "slice_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "vlan_id": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4094
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "vni": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16777215
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rate_limit_mbps": {
+      "type": "number",
+      "minimum": 0
+    },
+    "throughput_mbps": {
+      "type": "number",
+      "minimum": 0
+    },
+    "latency_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "jitter_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "loss_rate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "queue_occupancy": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "sla_status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "unknown"
+      ]
+    }
+  },
+  "required": [
+    "run_id",
+    "scenario_id",
+    "evidence_class",
+    "timestamp",
+    "source",
+    "subscriber_id",
+    "slice_id",
+    "vlan_id",
+    "vni",
+    "rate_limit_mbps",
+    "throughput_mbps",
+    "latency_ms",
+    "jitter_ms",
+    "loss_rate",
+    "queue_occupancy",
+    "sla_status"
+  ]
+}

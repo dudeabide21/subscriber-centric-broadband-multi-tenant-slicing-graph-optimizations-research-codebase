@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "edge_resource.schema.json",
+  "title": "Stage 2 Edge Resource Evidence",
+  "description": "Aggregate AP or gateway resource and overhead evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_class": {
+      "type": "string",
+      "enum": [
+        "M",
+        "E",
+        "S",
+        "C"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ap_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cpu_ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "ram_ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "irq_rate": {
+      "type": "number",
+      "minimum": 0
+    },
+    "crypto_throughput_mbps": {
+      "type": "number",
+      "minimum": 0
+    },
+    "tunnel_overhead_ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "queueing_overhead_ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "telemetry_interval_s": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    }
+  },
+  "required": [
+    "run_id",
+    "scenario_id",
+    "evidence_class",
+    "timestamp",
+    "source",
+    "ap_id",
+    "cpu_ratio",
+    "ram_ratio",
+    "irq_rate",
+    "crypto_throughput_mbps",
+    "tunnel_overhead_ratio",
+    "queueing_overhead_ratio",
+    "telemetry_interval_s"
+  ]
+}
