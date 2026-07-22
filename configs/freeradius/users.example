@@ -1,3 +1,27 @@
-# Example only
-subscriber123 Cleartext-Password := "example-password"
-    Reply-Message := "Synthetic example user"
+# Stage 2 FreeRADIUS users example.
+#
+# This file is a controlled-lab template only. It must not contain real
+# subscriber identities or production credentials.
+#
+# The accepted subscriber receives:
+# - an explicit slice identifier through Filter-Id;
+# - VLAN 110;
+# - a Class value retained in accounting records.
+#
+# Rate-to-class mapping is documented in policy_mapping.example.
+
+"subscriber-demo-001@<SUBSCRIBER_REALM>" Cleartext-Password := "<EXAMPLE_SUBSCRIBER_PASSWORD>"
+    Reply-Message := "stage2-policy-basic",
+    Filter-Id := "slice-basic",
+    Tunnel-Type := VLAN,
+    Tunnel-Medium-Type := IEEE-802,
+    Tunnel-Private-Group-Id := "110",
+    Class := "acct-prototype-basic-001"
+
+# Explicit invalid-subscriber path.
+#
+# This identity must not receive a VLAN, slice, shaping class, session ID,
+# or successful accounting-start identity.
+
+"subscriber-demo-invalid@<SUBSCRIBER_REALM>" Auth-Type := Reject
+    Reply-Message := "invalid-stage2-subscriber"
