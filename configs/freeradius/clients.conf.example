@@ -1,5 +1,11 @@
-# Example only
-client ap-lab {
-    ipaddr = 192.0.2.10
-    secret = testing123
+# Stage 2 FreeRADIUS client example.
+#
+# Replace every placeholder locally. Never commit the replacement secret.
+
+client stage2-ap-gateway {
+    ipaddr = <AP_GATEWAY_IP>
+    secret = <RADIUS_SECRET>
+    shortname = stage2-ap
+    nastype = other
+    require_message_authenticator = yes
 }
