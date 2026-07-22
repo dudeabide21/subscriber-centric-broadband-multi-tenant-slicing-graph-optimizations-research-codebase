@@ -22,3 +22,29 @@ placeholders and must never be committed.
 
 Operational templates are added in Stage 2.3. This README does not authorize
 deployment to a live RADIUS server.
+
+## Stage 2.3 template inventory
+
+The controlled-lab template set contains:
+
+- `users.example` — accepted and explicitly rejected subscriber examples;
+- `clients.conf.example` — AP/gateway RADIUS client placeholder;
+- `policy_mapping.example` — deterministic subscriber-to-policy mapping;
+- `sites-enabled-default-notes.md` — non-operational integration notes.
+
+The accepted path represents:
+
+`subscriber -> accept -> policy -> slice -> VLAN -> tc class -> accounting ID`
+
+The rejected path represents:
+
+`subscriber -> reject -> no slice -> no shaping class -> no successful
+accounting-start identity`
+
+Before any local use:
+
+1. copy examples outside the repository-managed template path;
+2. replace placeholders locally;
+3. keep secrets and certificates outside Git;
+4. validate FreeRADIUS syntax;
+5. prepare rollback before restarting any service.
