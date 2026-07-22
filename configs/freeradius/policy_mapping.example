@@ -1,0 +1,67 @@
+# Stage 2 deterministic policy-mapping specification.
+#
+# This file documents the expected mapping. It is not loaded automatically by
+# FreeRADIUS and must be translated into reviewed local unlang or SQL policy
+# before live use.
+
+[subscriber-demo-001@<SUBSCRIBER_REALM>]
+auth_result = accept
+policy_id = policy-basic-20m
+slice_id = slice-basic
+vlan_id = 110
+vni = null
+tc_class_id = 1:10
+rate_limit = 20mbit
+rate_ceiling = 25mbit
+queue_discipline = fq_codel
+accounting_class = acct-prototype-basic-001
+
+[subscriber-demo-priority@<SUBSCRIBER_REALM>]
+auth_result = accept
+policy_id = policy-priority-40m
+slice_id = slice-priority
+vlan_id = 120
+vni = null
+tc_class_id = 1:20
+rate_limit = 40mbit
+rate_ceiling = 50mbit
+queue_discipline = fq_codel
+accounting_class = acct-prototype-priority-001
+
+[subscriber-demo-guest@<SUBSCRIBER_REALM>]
+auth_result = accept
+policy_id = policy-guest-5m
+slice_id = slice-guest
+vlan_id = 130
+vni = null
+tc_class_id = 1:30
+rate_limit = 5mbit
+rate_ceiling = 5mbit
+queue_discipline = fq_codel
+accounting_class = acct-prototype-guest-001
+
+[subscriber-demo-invalid@<SUBSCRIBER_REALM>]
+auth_result = reject
+failure_reason = invalid-subscriber
+policy_id = null
+slice_id = null
+vlan_id = null
+vni = null
+tc_class_id = null
+rate_limit = null
+rate_ceiling = null
+queue_discipline = null
+accounting_class = null
+
+[default]
+auth_result = reject
+failure_reason = no-explicit-policy
+policy_id = null
+slice_id = null
+vlan_id = null
+vni = null
+tc_class_id = null
+rate_limit = null
+rate_ceiling = null
+queue_discipline = null
+accounting_class = null
