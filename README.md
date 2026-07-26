@@ -4,7 +4,7 @@ Research workflow for **Safety-Constrained Subscriber-Centric Broadband Infrastr
 
 This repository is a research pipeline, not a product app. It is organized around safe sample parsing, explicit evidence classes, queueing/control analysis, and controlled experiment artifacts.
 
-## What’s In Scope
+## What’s In The Scope Of The Project
 
 - federated AAA and subscriber-centric policy enforcement
 - OpenWrt-class edge telemetry and Linux traffic control
