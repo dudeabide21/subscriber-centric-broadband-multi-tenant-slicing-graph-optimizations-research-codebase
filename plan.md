@@ -2,7 +2,7 @@
 
 ## Milestone 1
 - Build the repository scaffold.
-- Add Fedora setup scripts.
+- Add WSL setup scripts.
 - Add Python packaging metadata and Makefile targets.
 - Write the core docs and safety guidance.
 
