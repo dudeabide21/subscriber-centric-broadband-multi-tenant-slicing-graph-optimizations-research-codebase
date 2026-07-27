@@ -1,0 +1,17 @@
+{
+  "run_id": "prototype_run_001",
+  "scenario_id": "single-subscriber-policy-path",
+  "evidence_class": "E",
+  "timestamp": "2026-07-27T00:00:00Z",
+  "source": "stage2-emulated-fixture",
+  "subscriber_id": "subscriber-demo-001",
+  "realm": "prototype.test",
+  "visited_ap": "ap-lab-001",
+  "home_domain": "home.prototype.test",
+  "eap_method": "EAP-TTLS/PAP",
+  "auth_result": "accept",
+  "failure_reason": null,
+  "auth_latency_ms": 18.4,
+  "session_id": "stage2-session-001",
+  "accounting_id": "acct-prototype-basic-001"
+}

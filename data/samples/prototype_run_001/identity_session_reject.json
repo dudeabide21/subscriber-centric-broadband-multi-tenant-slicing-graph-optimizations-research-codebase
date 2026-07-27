@@ -1,0 +1,17 @@
+{ 
+    "run_id": "prototype_run_001",
+    "scenario_id": "single-subscriber-policy-path",
+    "evidence_class": "E",
+    "timestamp": "2026-07-27T00:00:01Z",
+    "source": "stage2-emulated-fixture",
+    "subscriber_id": "subscriber-demo-invalid",
+    "realm": "prototype.test",
+    "visited_ap": "ap-lab-001",
+    "home_domain": "home.prototype.test",
+    "eap_method": "EAP-TTLS/PAP",
+    "auth_result": "reject",
+    "failure_reason": "invalid-subscriber",
+    "auth_latency_ms": 9.7,
+    "session_id": null,
+     "accounting_id": null 
+}
