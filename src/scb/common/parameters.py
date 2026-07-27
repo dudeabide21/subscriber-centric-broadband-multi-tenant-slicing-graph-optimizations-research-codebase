@@ -1,4 +1,4 @@
-"""Validation helpers for fixed evaluation and operational parametes"""
+"""Validation helpers for fixed evaluation and operational parameters."""
 
 from __future__ import annotations
 
@@ -6,8 +6,9 @@ import math
 from dataclasses import dataclass
 from numbers import Real
 
+
 DEFAULT_DELTA_MIN = 0.05
-DELTA_MIN_SENSITIVITY_SET = (0.02,0.05,0.10)
+DELTA_MIN_SENSITIVITY_SET = (0.02, 0.05, 0.10)
 
 
 @dataclass(frozen=True)
@@ -96,7 +97,11 @@ def validate_backhaul_capacity(
     b_curr: Real,
     b_nominal: Real,
 ) -> BackhaulCapacity:
-    """Validate current measured and nominal expected backhaul capacities."""
+    """Validate current measured and nominal expected backhaul capacities.
+
+    A current measured capacity of zero is valid. The nominal expected
+    capacity must be strictly positive.
+    """
     validated_b_curr = _coerce_finite_real(b_curr, name="b_curr")
     validated_b_nominal = _coerce_finite_real(
         b_nominal,
