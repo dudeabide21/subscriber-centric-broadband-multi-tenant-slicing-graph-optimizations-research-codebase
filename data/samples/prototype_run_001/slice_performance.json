@@ -1,0 +1,18 @@
+{
+    "run_id": "prototype_run_001",
+    "scenario_id": "single-subscriber-policy-path",
+    "evidence_class": "E",
+    "timestamp": "2026-07-27T00:00:05Z",
+    "source": "stage2-emulated-fixture",
+    "subscriber_id": "subscriber-demo-001",
+    "slice_id": "slice-basic",
+    "vlan_id": 110,
+    "vni": null,
+    "rate_limit_mbps": 20.0,
+    "throughput_mbps": 18.6,
+    "latency_ms": 24.5,
+    "jitter_ms": 2.8,
+    "loss_rate": 0.001,
+    "queue_occupancy": 0.22,
+    "sla_status": "pass"
+}

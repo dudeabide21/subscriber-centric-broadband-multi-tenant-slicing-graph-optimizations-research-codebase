@@ -1,0 +1,15 @@
+{
+    "run_id": "prototype_run_001",
+    "scenario_id": "single-subscriber-policy-path",
+    "evidence_class": "E",
+    "timestamp": "2026-07-27T00:00:02Z",
+    "source": "stage2-emulated-fixture",
+    "ap_id": "ap-lab-001",
+    "cpu_ratio": 0.32,
+    "ram_ratio": 0.45,
+    "tunnel_overhead_ratio": 0.04,
+    "queueing_overhead_ratio": 0.08,
+    "irq_rate": 940,
+    "crypto_throughput_mbps": 72.0,
+    "telemetry_interval_s": 5.0
+}
