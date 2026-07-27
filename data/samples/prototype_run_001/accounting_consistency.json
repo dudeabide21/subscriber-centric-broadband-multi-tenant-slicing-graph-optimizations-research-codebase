@@ -1,0 +1,17 @@
+{
+    "run_id": "prototype_run_001", 
+    "scenario_id": "single-subscriber-policy-path", 
+    "evidence_class": "E", 
+    "timestamp": "2026-07-27T00:02:00Z", 
+    "source": "stage2-emulated-fixture", 
+    "subscriber_id": "subscriber-demo-001", 
+    "session_id": "stage2-session-001", 
+    "radius_bytes_in": 2500000, 
+    "radius_bytes_out": 4500000, 
+    "gateway_bytes_in": 2500000, 
+    "gateway_bytes_out": 4500000, 
+    "byte_mismatch": 0, 
+    "within_tolerance": true, 
+    "termination_cause": "User-Request", 
+    "offline_signature_present": false 
+} 
