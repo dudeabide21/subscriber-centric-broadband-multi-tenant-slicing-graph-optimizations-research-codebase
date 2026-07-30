@@ -23,3 +23,6 @@ htmlcov/
 data/test_processed/
 .agents/
 .claude/
+docs/
+reports/
+
