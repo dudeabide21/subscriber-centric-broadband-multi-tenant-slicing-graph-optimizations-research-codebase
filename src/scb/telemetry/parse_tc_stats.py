@@ -1,21 +1,18 @@
-"""Parse synthetic Linux ``tc`` class/qdisc statistics.
-
-The synthetic format mirrors the relevant fields of ``tc -s class show``:
-
-    class htb <class_id> root rate <RATE>Mbit ceil <CEIL>Mbit
-        sent <BYTES> bytes <PACKETS> packets <DROPS> drops
-        backlog <BB>b <BP>p requeues <RQ>
-
-Every record is validated against a strict regular expression so any drift
-in the synthetic generator fails loudly during CI.
-"""
+"""Parse strict synthetic Linux ``tc`` class statistics."""
 
 from __future__ import annotations
 
 import re
-from collections.abc import Iterator
+from datetime import UTC, datetime
 from pathlib import Path
 
+from scb.telemetry.parser_common import (
+    iter_data_lines,
+    read_utf8_text,
+    repository_relative_source,
+    require_records,
+    validate_aware_timestamp,
+)
 from scb.telemetry.schemas import EvidenceClass, TcStatsRecord
 
 _TC_LINE_RE = re.compile(
@@ -29,54 +26,50 @@ _TC_LINE_RE = re.compile(
 )
 
 
-def _iter_matches(text: str) -> Iterator[re.Match[str]]:
-    for raw in text.splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        match = _TC_LINE_RE.fullmatch(line)
-        if match is None:
-            raise ValueError(f"invalid tc stats line: {line}")
-        yield match
-
-
 def parse_tc_stats(
     path: Path,
     repo_root: Path,
     parser_version: str,
     interface: str = "ifb0",
     evidence_class: EvidenceClass = EvidenceClass.SYNTHETIC,
+    *,
+    parsed_at: str | None = None,
 ) -> list[TcStatsRecord]:
-    """Parse a synthetic ``tc`` class statistics file.
+    """Parse class counters with unique IDs and coherent configured rates."""
 
-    Args:
-        path: Path to the file.
-        repo_root: Repository root used to compute the relative source path.
-        parser_version: Parser version stamp.
-        interface: The interface label to attach to every record. The
-            synthetic samples do not encode this field.
-        evidence_class: Defaults to :attr:`EvidenceClass.SYNTHETIC`.
-
-    Returns:
-        A list of :class:`TcStatsRecord` objects.
-
-    Raises:
-        ValueError: If a line does not match the expected format.
-    """
-
-    text = path.read_text(encoding="utf-8")
+    interface = interface.strip()
+    if not interface:
+        raise ValueError("tc interface must be non-empty")
+    source_file = repository_relative_source(path, repo_root)
+    parse_time = parsed_at or datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    validate_aware_timestamp(parse_time, field="parsed_at")
     records: list[TcStatsRecord] = []
-    for match in _iter_matches(text):
+    class_ids: set[str] = set()
+    for line_number, line in iter_data_lines(read_utf8_text(path)):
+        match = _TC_LINE_RE.fullmatch(line)
+        if match is None:
+            raise ValueError(f"tc line {line_number}: invalid class statistics")
+        class_id = match.group("class_id")
+        if class_id in class_ids:
+            raise ValueError(f"tc line {line_number}: duplicate class_id {class_id!r}")
+        class_ids.add(class_id)
+        rate_mbit = float(match.group("rate_mbit"))
+        ceil_mbit = float(match.group("ceil_mbit"))
+        if rate_mbit <= 0 or ceil_mbit <= 0:
+            raise ValueError(f"tc line {line_number}: rates must be positive")
+        if rate_mbit > ceil_mbit:
+            raise ValueError(f"tc line {line_number}: rate exceeds ceil")
         records.append(
             TcStatsRecord(
                 evidence_class=evidence_class,
-                source_file=path.relative_to(repo_root).as_posix(),
+                source_file=source_file,
                 source_type="tc_stats",
                 parser_version=parser_version,
+                parsed_at=parse_time,
                 interface=interface,
-                class_id=match.group("class_id"),
-                rate_mbit=float(match.group("rate_mbit")),
-                ceil_mbit=float(match.group("ceil_mbit")),
+                class_id=class_id,
+                rate_mbit=rate_mbit,
+                ceil_mbit=ceil_mbit,
                 sent_bytes=int(match.group("sent_bytes")),
                 packets=int(match.group("packets")),
                 drops=int(match.group("drops")),
@@ -85,4 +78,4 @@ def parse_tc_stats(
                 requeues=int(match.group("requeues")),
             )
         )
-    return records
+    return require_records(records, context="tc statistics")

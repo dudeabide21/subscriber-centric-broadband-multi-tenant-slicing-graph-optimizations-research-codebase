@@ -1,21 +1,22 @@
-"""Parse synthetic WireGuard transfer statistics.
-
-Synthetic format:
-
-    interface=<ifname> peer_id_hash=<hash> rx_bytes=<int> tx_bytes=<int>
-        latest_handshake=<ISO-timestamp>
-
-The parser is strict: unknown keys are rejected so the researcher can never
-accidentally invent peer fields.
-"""
+"""Parse strict WireGuard transfer statistics."""
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 
+from scb.telemetry.parser_common import (
+    iter_data_lines,
+    nonnegative_int,
+    parse_strict_key_values,
+    read_utf8_text,
+    repository_relative_source,
+    require_records,
+    validate_aware_timestamp,
+)
 from scb.telemetry.schemas import EvidenceClass, WireGuardStatsRecord
 
-_ALLOWED_KEYS = {
+_REQUIRED_KEYS = {
     "interface",
     "peer_id_hash",
     "rx_bytes",
@@ -24,74 +25,47 @@ _ALLOWED_KEYS = {
 }
 
 
-def _iter_lines(text: str) -> list[list[str]]:
-    out: list[list[str]] = []
-    for raw in text.splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        out.append(line.split())
-    return out
-
-
-def _parse_key_values(tokens: list[str], record: WireGuardStatsRecord) -> None:
-    for token in tokens:
-        if "=" not in token:
-            continue
-        key, raw = token.split("=", 1)
-        key = key.strip()
-        if key not in _ALLOWED_KEYS:
-            raise ValueError(f"unknown wireguard key: {key}")
-        value = raw.strip()
-        if key == "interface":
-            record.interface = value
-        elif key == "peer_id_hash":
-            record.peer_id_hash = value
-        elif key == "rx_bytes":
-            record.transfer_rx_bytes = int(value)
-        elif key == "tx_bytes":
-            record.transfer_tx_bytes = int(value)
-        elif key == "latest_handshake":
-            record.latest_handshake = value
-
-
 def parse_wireguard_stats(
     path: Path,
     repo_root: Path,
     parser_version: str,
     evidence_class: EvidenceClass = EvidenceClass.SYNTHETIC,
+    *,
+    parsed_at: str | None = None,
 ) -> list[WireGuardStatsRecord]:
-    """Parse a synthetic WireGuard transfer statistics file.
+    """Parse complete peer snapshots without counter defaults or repairs."""
 
-    Args:
-        path: Path to the file.
-        repo_root: Repository root used to compute the relative source path.
-        parser_version: Parser version stamp.
-        evidence_class: Defaults to :attr:`EvidenceClass.SYNTHETIC`.
-
-    Returns:
-        A list of :class:`WireGuardStatsRecord` objects.
-
-    Raises:
-        ValueError: If a line is malformed or contains an unknown key.
-    """
-
-    text = path.read_text(encoding="utf-8")
+    source_file = repository_relative_source(path, repo_root)
+    parse_time = parsed_at or datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    validate_aware_timestamp(parse_time, field="parsed_at")
     records: list[WireGuardStatsRecord] = []
-    for tokens in _iter_lines(text):
-        record = WireGuardStatsRecord(
-            evidence_class=evidence_class,
-            source_file=path.relative_to(repo_root).as_posix(),
-            source_type="wireguard_stats",
-            parser_version=parser_version,
-            interface="",
-            peer_id_hash="",
-            transfer_rx_bytes=0,
-            transfer_tx_bytes=0,
-            latest_handshake="",
+    for line_number, line in iter_data_lines(read_utf8_text(path)):
+        context = f"WireGuard line {line_number}"
+        values = parse_strict_key_values(
+            line.split(),
+            allowed_keys=_REQUIRED_KEYS,
+            required_keys=_REQUIRED_KEYS,
+            context=context,
         )
-        _parse_key_values(tokens, record)
-        if not record.interface or not record.peer_id_hash:
-            raise ValueError(f"missing required wireguard keys: {tokens}")
-        records.append(record)
-    return records
+        validate_aware_timestamp(
+            values["latest_handshake"], field=f"{context} latest_handshake"
+        )
+        records.append(
+            WireGuardStatsRecord(
+                evidence_class=evidence_class,
+                source_file=source_file,
+                source_type="wireguard_stats",
+                parser_version=parser_version,
+                parsed_at=parse_time,
+                interface=values["interface"],
+                peer_id_hash=values["peer_id_hash"],
+                transfer_rx_bytes=nonnegative_int(
+                    values["rx_bytes"], field=f"{context} rx_bytes"
+                ),
+                transfer_tx_bytes=nonnegative_int(
+                    values["tx_bytes"], field=f"{context} tx_bytes"
+                ),
+                latest_handshake=values["latest_handshake"],
+            )
+        )
+    return require_records(records, context="WireGuard statistics")

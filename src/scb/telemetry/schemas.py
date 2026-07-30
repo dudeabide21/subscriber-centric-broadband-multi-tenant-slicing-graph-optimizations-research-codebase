@@ -1,16 +1,13 @@
-"""Pydantic schemas for parsed telemetry records.
-
-All parsed records inherit from :class:`BaseTelemetryRecord`, which carries
-provenance metadata. The evidence class is part of the public schema so the
-caller can always distinguish synthetic samples from real measurements.
-"""
+"""Validated schemas for provenance-bearing telemetry records."""
 
 from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from scb.telemetry.parser_common import validate_aware_timestamp
 
 
 class EvidenceClass(StrEnum):
@@ -24,95 +21,109 @@ class EvidenceClass(StrEnum):
 
 
 class BaseTelemetryRecord(BaseModel):
-    """Common fields for every parsed telemetry record.
+    """Common provenance fields carried by every parsed record."""
 
-    Attributes:
-        evidence_class: One of :class:`EvidenceClass`. Synthetic samples must
-            always be tagged :attr:`EvidenceClass.SYNTHETIC`.
-        source_file: Repository-relative POSIX path of the source file.
-        source_type: Short free-form tag describing the parser family
-            (for example ``"radius_auth"`` or ``"tc_stats"``).
-        parser_version: Semantic version of the parser that produced the record.
-        parsed_at: UTC ISO-8601 timestamp recording when parsing occurred.
-    """
-
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    model_config = ConfigDict(
+        extra="forbid",
+        str_strip_whitespace=True,
+        validate_assignment=True,
+    )
 
     evidence_class: EvidenceClass
-    source_file: str
-    source_type: str
-    parser_version: str
+    source_file: str = Field(min_length=1)
+    source_type: str = Field(min_length=1)
+    parser_version: str = Field(min_length=1)
     parsed_at: str = Field(
         default_factory=lambda: datetime.now(UTC).isoformat().replace("+00:00", "Z")
     )
+
+    @field_validator("parsed_at")
+    @classmethod
+    def _aware_parse_time(cls, value: str) -> str:
+        return validate_aware_timestamp(value, field="parsed_at")
 
 
 class RadiusRecord(BaseTelemetryRecord):
     """A single RADIUS authentication or accounting event."""
 
     timestamp: str
-    event_type: str
-    subscriber_id_hash: str | None = None
-    ap_id: str | None = None
-    auth_result: str | None = None
-    auth_latency_ms: float | None = None
-    accounting_session_id: str | None = None
-    input_octets: int | None = None
-    output_octets: int | None = None
+    event_type: str = Field(min_length=1)
+    subscriber_id_hash: str | None = Field(default=None, min_length=1)
+    ap_id: str | None = Field(default=None, min_length=1)
+    auth_result: str | None = Field(default=None, min_length=1)
+    auth_latency_ms: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    accounting_session_id: str | None = Field(default=None, min_length=1)
+    input_octets: int | None = Field(default=None, ge=0)
+    output_octets: int | None = Field(default=None, ge=0)
+
+    @field_validator("timestamp")
+    @classmethod
+    def _aware_event_time(cls, value: str) -> str:
+        return validate_aware_timestamp(value, field="timestamp")
 
 
 class TcStatsRecord(BaseTelemetryRecord):
     """A single Linux ``tc`` class statistics sample."""
 
-    interface: str
-    class_id: str
-    rate_mbit: float
-    ceil_mbit: float
-    sent_bytes: int
-    packets: int
-    drops: int
-    backlog_bytes: int
-    backlog_packets: int
-    requeues: int
+    interface: str = Field(min_length=1)
+    class_id: str = Field(min_length=1)
+    rate_mbit: float = Field(gt=0, allow_inf_nan=False)
+    ceil_mbit: float = Field(gt=0, allow_inf_nan=False)
+    sent_bytes: int = Field(ge=0)
+    packets: int = Field(ge=0)
+    drops: int = Field(ge=0)
+    backlog_bytes: int = Field(ge=0)
+    backlog_packets: int = Field(ge=0)
+    requeues: int = Field(ge=0)
 
 
 class OpenWrtMetricRecord(BaseTelemetryRecord):
     """A single OpenWrt CPU/RAM/IRQ sample."""
 
     timestamp: str
-    ap_id: str
-    cpu_percent: float
-    ram_used_mb: float
-    ram_total_mb: float
-    irq_rate: float
-    load_avg: float
+    ap_id: str = Field(min_length=1)
+    cpu_percent: float = Field(ge=0, le=100, allow_inf_nan=False)
+    ram_used_mb: float = Field(ge=0, allow_inf_nan=False)
+    ram_total_mb: float = Field(gt=0, allow_inf_nan=False)
+    irq_rate: float = Field(ge=0, allow_inf_nan=False)
+    load_avg: float = Field(ge=0, allow_inf_nan=False)
+
+    @field_validator("timestamp")
+    @classmethod
+    def _aware_metric_time(cls, value: str) -> str:
+        return validate_aware_timestamp(value, field="timestamp")
 
 
 class WireGuardStatsRecord(BaseTelemetryRecord):
     """A single WireGuard transfer sample."""
 
-    interface: str
-    peer_id_hash: str
-    transfer_rx_bytes: int
-    transfer_tx_bytes: int
+    interface: str = Field(min_length=1)
+    peer_id_hash: str = Field(min_length=1)
+    transfer_rx_bytes: int = Field(ge=0)
+    transfer_tx_bytes: int = Field(ge=0)
     latest_handshake: str
+
+    @field_validator("latest_handshake")
+    @classmethod
+    def _aware_handshake_time(cls, value: str) -> str:
+        return validate_aware_timestamp(value, field="latest_handshake")
 
 
 class ParsedDatasetSummary(BaseModel):
-    """Summary of a parsed sample directory run.
+    """Manifest for one deterministic telemetry parsing run."""
 
-    Attributes:
-        sample_count: Total number of records parsed.
-        files: Number of files processed.
-        evidence_classes: Counts of records grouped by evidence class.
-        parser_version: Parser version used for the run.
-        generated_at: UTC ISO-8601 timestamp.
-    """
+    model_config = ConfigDict(extra="forbid")
 
-    sample_count: int
-    files: int
+    sample_count: int = Field(ge=0)
+    files: int = Field(ge=0)
     evidence_classes: dict[str, int]
-    parser_version: str
+    parser_version: str = Field(min_length=1)
+    source_sha256: dict[str, str]
     generated_at: str = Field(
         default_factory=lambda: datetime.now(UTC).isoformat().replace("+00:00", "Z")
     )
+
+    @field_validator("generated_at")
+    @classmethod
+    def _aware_generated_time(cls, value: str) -> str:
+        return validate_aware_timestamp(value, field="generated_at")

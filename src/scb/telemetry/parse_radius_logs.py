@@ -1,71 +1,51 @@
-"""Parse synthetic RADIUS authentication and accounting logs.
-
-The synthetic RADIUS sample format is a deliberately simple key/value layout:
-
-    <ISO-timestamp> <AUTH|ACCT> <key=value> <key=value> ...
-
-The parser is intentionally strict: malformed lines raise an error so the
-researcher can never silently invent records. The returned records are
-Pydantic :class:`RadiusRecord` instances with the standard provenance
-metadata (evidence class, source file, parser version, parse timestamp).
-"""
+"""Parse strict RADIUS authentication and accounting telemetry."""
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from datetime import UTC, datetime
 from pathlib import Path
 
+from scb.telemetry.parser_common import (
+    finite_float,
+    iter_data_lines,
+    nonnegative_int,
+    parse_strict_key_values,
+    read_utf8_text,
+    repository_relative_source,
+    require_records,
+    validate_aware_timestamp,
+)
 from scb.telemetry.schemas import EvidenceClass, RadiusRecord
 
-_AUTH_RESULT_KEYS = {"result", "auth_result"}
-_LATENCY_KEYS = {"latency_ms", "auth_latency_ms"}
-_SESSION_KEYS = {"session_id", "accounting_session_id"}
-_OCTET_KEYS_IN = {"input_octets"}
-_OCTET_KEYS_OUT = {"output_octets"}
+_COMMON_KEYS = {"subscriber_id_hash", "ap_id"}
+_AUTH_KEYS = _COMMON_KEYS | {"auth_result", "auth_latency_ms"}
+_ACCT_KEYS = _COMMON_KEYS | {
+    "accounting_session_id",
+    "input_octets",
+    "output_octets",
+}
+_ALIASES = {
+    "result": "auth_result",
+    "latency_ms": "auth_latency_ms",
+    "session_id": "accounting_session_id",
+}
+_AUTH_RESULTS = {"ACCEPT", "REJECT", "ERROR"}
 
 
-def _coerce_int(value: str) -> int:
-    return int(value)
+def _parse_time(parsed_at: str | None) -> str:
+    value = parsed_at or datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    return validate_aware_timestamp(value, field="parsed_at")
 
 
-def _coerce_float(value: str) -> float:
-    return float(value)
-
-
-def _parse_key_values(
-    tokens: Iterable[str],
-    record: RadiusRecord,
-) -> None:
-    """Populate a :class:`RadiusRecord` from ``key=value`` tokens."""
-
-    for token in tokens:
-        if "=" not in token:
-            continue
-        key, raw = token.split("=", 1)
-        key = key.strip()
-        raw = raw.strip()
-        if key == "subscriber_id_hash":
-            record.subscriber_id_hash = raw
-        elif key == "ap_id":
-            record.ap_id = raw
-        elif key in _AUTH_RESULT_KEYS:
-            record.auth_result = raw
-        elif key in _LATENCY_KEYS:
-            record.auth_latency_ms = _coerce_float(raw)
-        elif key in _SESSION_KEYS:
-            record.accounting_session_id = raw
-        elif key in _OCTET_KEYS_IN:
-            record.input_octets = _coerce_int(raw)
-        elif key in _OCTET_KEYS_OUT:
-            record.output_octets = _coerce_int(raw)
-
-
-def _iter_lines(text: str) -> Iterable[str]:
-    for raw in text.splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        yield line
+def _base_line(line: str, *, line_number: int) -> tuple[str, str, list[str]]:
+    tokens = line.split()
+    if len(tokens) < 3:
+        raise ValueError(
+            f"RADIUS line {line_number}: expected timestamp, event, and fields"
+        )
+    timestamp, event_type, *fields = tokens
+    validate_aware_timestamp(timestamp, field=f"RADIUS line {line_number} timestamp")
+    return timestamp, event_type, fields
 
 
 def parse_radius_auth_log(
@@ -73,41 +53,47 @@ def parse_radius_auth_log(
     repo_root: Path,
     parser_version: str,
     evidence_class: EvidenceClass = EvidenceClass.SYNTHETIC,
+    *,
+    parsed_at: str | None = None,
 ) -> list[RadiusRecord]:
-    """Parse a synthetic RADIUS authentication log.
+    """Parse authentication events, rejecting incomplete or ambiguous lines."""
 
-    Args:
-        path: Path to the log file.
-        repo_root: Repository root used to compute the relative source file.
-        parser_version: Parser version stamp added to every record.
-        evidence_class: Defaults to :attr:`EvidenceClass.SYNTHETIC`. Real
-            measurement data should be re-tagged upstream.
-
-    Returns:
-        A list of :class:`RadiusRecord` objects.
-
-    Raises:
-        ValueError: If a line is malformed.
-    """
-
+    source_file = repository_relative_source(path, repo_root)
+    parse_time = _parse_time(parsed_at)
     records: list[RadiusRecord] = []
-    text = path.read_text(encoding="utf-8")
-    for line in _iter_lines(text):
-        tokens = line.split()
-        if len(tokens) < 2:
-            raise ValueError(f"invalid radius line: {line}")
-        timestamp, event_type, *rest = tokens
-        record = RadiusRecord(
-            evidence_class=evidence_class,
-            source_file=path.relative_to(repo_root).as_posix(),
-            source_type="radius_auth",
-            parser_version=parser_version,
-            timestamp=timestamp,
-            event_type=event_type,
+    for line_number, line in iter_data_lines(read_utf8_text(path)):
+        timestamp, event_type, tokens = _base_line(line, line_number=line_number)
+        if event_type != "AUTH":
+            raise ValueError(f"RADIUS line {line_number}: expected AUTH event")
+        context = f"RADIUS AUTH line {line_number}"
+        values = parse_strict_key_values(
+            tokens,
+            allowed_keys=_AUTH_KEYS,
+            required_keys=_AUTH_KEYS,
+            aliases=_ALIASES,
+            context=context,
         )
-        _parse_key_values(rest, record)
-        records.append(record)
-    return records
+        auth_result = values["auth_result"].upper()
+        if auth_result not in _AUTH_RESULTS:
+            raise ValueError(f"{context}: unsupported auth result {auth_result!r}")
+        records.append(
+            RadiusRecord(
+                evidence_class=evidence_class,
+                source_file=source_file,
+                source_type="radius_auth",
+                parser_version=parser_version,
+                parsed_at=parse_time,
+                timestamp=timestamp,
+                event_type=event_type,
+                subscriber_id_hash=values["subscriber_id_hash"],
+                ap_id=values["ap_id"],
+                auth_result=auth_result,
+                auth_latency_ms=finite_float(
+                    values["auth_latency_ms"], field=f"{context} auth_latency_ms"
+                ),
+            )
+        )
+    return require_records(records, context="RADIUS authentication log")
 
 
 def parse_radius_acct_log(
@@ -115,24 +101,44 @@ def parse_radius_acct_log(
     repo_root: Path,
     parser_version: str,
     evidence_class: EvidenceClass = EvidenceClass.SYNTHETIC,
+    *,
+    parsed_at: str | None = None,
 ) -> list[RadiusRecord]:
-    """Parse a synthetic RADIUS accounting log."""
+    """Parse accounting events without repairing missing counters."""
 
+    source_file = repository_relative_source(path, repo_root)
+    parse_time = _parse_time(parsed_at)
     records: list[RadiusRecord] = []
-    text = path.read_text(encoding="utf-8")
-    for line in _iter_lines(text):
-        tokens = line.split()
-        if len(tokens) < 2:
-            raise ValueError(f"invalid radius line: {line}")
-        timestamp, event_type, *rest = tokens
-        record = RadiusRecord(
-            evidence_class=evidence_class,
-            source_file=path.relative_to(repo_root).as_posix(),
-            source_type="radius_acct",
-            parser_version=parser_version,
-            timestamp=timestamp,
-            event_type=event_type,
+    for line_number, line in iter_data_lines(read_utf8_text(path)):
+        timestamp, event_type, tokens = _base_line(line, line_number=line_number)
+        if event_type != "ACCT":
+            raise ValueError(f"RADIUS line {line_number}: expected ACCT event")
+        context = f"RADIUS ACCT line {line_number}"
+        values = parse_strict_key_values(
+            tokens,
+            allowed_keys=_ACCT_KEYS,
+            required_keys=_ACCT_KEYS,
+            aliases=_ALIASES,
+            context=context,
         )
-        _parse_key_values(rest, record)
-        records.append(record)
-    return records
+        records.append(
+            RadiusRecord(
+                evidence_class=evidence_class,
+                source_file=source_file,
+                source_type="radius_acct",
+                parser_version=parser_version,
+                parsed_at=parse_time,
+                timestamp=timestamp,
+                event_type=event_type,
+                subscriber_id_hash=values["subscriber_id_hash"],
+                ap_id=values["ap_id"],
+                accounting_session_id=values["accounting_session_id"],
+                input_octets=nonnegative_int(
+                    values["input_octets"], field=f"{context} input_octets"
+                ),
+                output_octets=nonnegative_int(
+                    values["output_octets"], field=f"{context} output_octets"
+                ),
+            )
+        )
+    return require_records(records, context="RADIUS accounting log")
