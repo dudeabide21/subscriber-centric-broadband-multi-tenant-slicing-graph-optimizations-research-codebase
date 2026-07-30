@@ -3,3 +3,56 @@ config interface 'lan'
     option proto 'static'
     option ipaddr '192.0.2.1'
     option netmask '255.255.255.0'
+
+# Stage 2 OpenWrt network example.
+#
+# Documentation-only UCI fragments. Do not apply directly to a live router.
+
+config device 'stage2_bridge'
+    option name 'br-stage2'
+    option type 'bridge'
+    list ports '<LAN_INTERFACE>'
+
+config bridge-vlan 'stage2_basic_vlan'
+    option device 'br-stage2'
+    option vlan '110'
+    list ports '<LAN_INTERFACE>:t'
+
+config bridge-vlan 'stage2_priority_vlan'
+    option device 'br-stage2'
+    option vlan '120'
+    list ports '<LAN_INTERFACE>:t'
+
+config bridge-vlan 'stage2_guest_vlan'
+    option device 'br-stage2'
+    option vlan '130'
+    list ports '<LAN_INTERFACE>:t'
+
+config interface 'stage2_basic'
+    option device 'br-stage2.110'
+    option proto 'static'
+    option ipaddr '192.0.2.1'
+    option netmask '255.255.255.0'
+
+config interface 'stage2_priority'
+    option device 'br-stage2.120'
+    option proto 'static'
+    option ipaddr '198.51.100.1'
+    option netmask '255.255.255.0'
+
+config interface 'stage2_guest'
+    option device 'br-stage2.130'
+    option proto 'static'
+    option ipaddr '203.0.113.1'
+    option netmask '255.255.255.0'
+
+config interface 'stage2_wan'
+    option device '<WAN_INTERFACE>'
+    option proto 'dhcp'
+
+# Resolve and review these runtime interfaces before live use:
+#
+# <AP_INTERFACE>
+# <LAN_INTERFACE>
+# <WAN_INTERFACE>
+# <MANAGEMENT_INTERFACE>

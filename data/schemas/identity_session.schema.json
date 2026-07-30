@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "identity_session.schema.json",
+  "title": "Stage 2 Identity Session Evidence",
+  "description": "Aggregate subscriber authentication and session evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_class": {
+      "type": "string",
+      "enum": [
+        "M",
+        "E",
+        "S",
+        "C"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subscriber_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "realm": {
+      "type": "string",
+      "minLength": 1
+    },
+    "visited_ap": {
+      "type": "string",
+      "minLength": 1
+    },
+    "home_domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "eap_method": {
+      "type": "string",
+      "minLength": 1
+    },
+    "auth_result": {
+      "type": "string",
+      "enum": [
+        "accept",
+        "reject",
+        "error"
+      ]
+    },
+    "failure_reason": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "auth_latency_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "session_id": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "accounting_id": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "run_id",
+    "scenario_id",
+    "evidence_class",
+    "timestamp",
+    "source",
+    "subscriber_id",
+    "realm",
+    "visited_ap",
+    "home_domain",
+    "eap_method",
+    "auth_result",
+    "failure_reason",
+    "auth_latency_ms",
+    "session_id",
+    "accounting_id"
+  ]
+}

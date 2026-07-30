@@ -2,3 +2,33 @@ config wifi-device 'radio0'
     option type 'mac80211'
     option band '2g'
     option channel '1'
+
+# Stage 2 OpenWrt wireless example.
+#
+# This is a UCI-style template only. It is not applied automatically.
+#
+# The AP-facing runtime interface corresponding to this configuration must be
+# resolved locally as <AP_INTERFACE> before live testing.
+
+config wifi-iface 'stage2_enterprise'
+    option device 'radio0'
+    option mode 'ap'
+    option network 'stage2_basic'
+    option ssid 'SCB-Stage2-Lab'
+    option encryption 'wpa2'
+    option ieee80211w '1'
+    option auth_server '<RADIUS_SERVER_IP>'
+    option auth_port '1812'
+    option auth_secret '<RADIUS_SECRET>'
+    option acct_server '<RADIUS_SERVER_IP>'
+    option acct_port '1813'
+    option acct_secret '<RADIUS_SECRET>'
+    option dynamic_vlan '1'
+    option vlan_naming '1'
+    option vlan_tagged_interface '<LAN_INTERFACE>'
+
+# Expected pseudonymous realm:
+#
+# <SUBSCRIBER_REALM>
+#
+# Do not place real subscriber credentials or RADIUS secrets in this file.

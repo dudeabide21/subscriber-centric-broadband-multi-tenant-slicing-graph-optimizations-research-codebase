@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "accounting_consistency.schema.json",
+  "title": "Stage 2 Accounting Consistency Evidence",
+  "description": "Aggregate RADIUS and gateway accounting comparison evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_class": {
+      "type": "string",
+      "enum": [
+        "M",
+        "E",
+        "S",
+        "C"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subscriber_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "radius_bytes_in": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "radius_bytes_out": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gateway_bytes_in": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gateway_bytes_out": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "byte_mismatch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "within_tolerance": {
+      "type": "boolean"
+    },
+    "termination_cause": {
+      "type": "string",
+      "minLength": 1
+    },
+    "offline_signature_present": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "run_id",
+    "scenario_id",
+    "evidence_class",
+    "timestamp",
+    "source",
+    "subscriber_id",
+    "session_id",
+    "radius_bytes_in",
+    "radius_bytes_out",
+    "gateway_bytes_in",
+    "gateway_bytes_out",
+    "byte_mismatch",
+    "within_tolerance",
+    "termination_cause",
+    "offline_signature_present"
+  ]
+}

@@ -1,0 +1,39 @@
+# Stage 2 hostapd 802.1X authenticator example.
+#
+# This file is documentation-only and must be adapted to the controlled lab.
+
+interface=<AP_INTERFACE>
+driver=nl80211
+ssid=SCB-Stage2-Lab
+
+ieee8021x=1
+eapol_version=2
+eapol_key_index_workaround=0
+
+auth_server_addr=<RADIUS_SERVER_IP>
+auth_server_port=1812
+auth_server_shared_secret=<RADIUS_SECRET>
+
+acct_server_addr=<RADIUS_SERVER_IP>
+acct_server_port=1813
+acct_server_shared_secret=<RADIUS_SECRET>
+acct_server_interim_interval=60
+
+own_ip_addr=<AP_GATEWAY_IP>
+nas_identifier=ap-lab-001
+
+dynamic_vlan=1
+vlan_naming=1
+vlan_tagged_interface=<LAN_INTERFACE>
+
+logger_syslog=-1
+logger_syslog_level=2
+logger_stdout=-1
+logger_stdout_level=2
+
+# Optional controlled EAP-TLS test-client material:
+#
+# client certificate: <CLIENT_CERT_PATH>
+# CA certificate: <CA_CERT_PATH>
+#
+# Private keys and certificate contents must never be committed.

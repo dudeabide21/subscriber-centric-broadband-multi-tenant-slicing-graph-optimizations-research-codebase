@@ -2,3 +2,55 @@ config zone
     option name 'lan'
     option network 'lan'
     option input 'ACCEPT'
+
+# Stage 2 OpenWrt firewall intent.
+#
+# This template represents intended forwarding boundaries. It is not proof of
+# cross-slice packet isolation. Negative packet tests are required before any
+# isolation claim.
+
+config zone 'stage2_basic_zone'
+    option name 'stage2_basic'
+    list network 'stage2_basic'
+    option input 'REJECT'
+    option output 'ACCEPT'
+    option forward 'REJECT'
+
+config zone 'stage2_priority_zone'
+    option name 'stage2_priority'
+    list network 'stage2_priority'
+    option input 'REJECT'
+    option output 'ACCEPT'
+    option forward 'REJECT'
+
+config zone 'stage2_guest_zone'
+    option name 'stage2_guest'
+    list network 'stage2_guest'
+    option input 'REJECT'
+    option output 'ACCEPT'
+    option forward 'REJECT'
+
+config zone 'stage2_wan_zone'
+    option name 'stage2_wan'
+    list network 'stage2_wan'
+    option input 'REJECT'
+    option output 'ACCEPT'
+    option forward 'REJECT'
+    option masq '1'
+
+config forwarding 'stage2_basic_to_wan'
+    option src 'stage2_basic'
+    option dest 'stage2_wan'
+
+config forwarding 'stage2_priority_to_wan'
+    option src 'stage2_priority'
+    option dest 'stage2_wan'
+
+config forwarding 'stage2_guest_to_wan'
+    option src 'stage2_guest'
+    option dest 'stage2_wan'
+
+# No forwarding is defined between subscriber slices.
+#
+# This is configuration intent only. It must not be described as validated
+# isolation until controlled negative packet tests have passed.
