@@ -1,22 +1,19 @@
-"""Telemetry parsing utilities.
+"""Strict telemetry parsing and accounting reconciliation utilities."""
 
-The package exposes both low-level parsers (one per source) and a higher
-level :mod:`scb.telemetry.sample_processing` driver that walks the
-synthetic samples directory and writes processed outputs.
-"""
+from __future__ import annotations
 
-from scb.telemetry.parse_openwrt_metrics import parse_openwrt_metrics
-from scb.telemetry.parse_radius_logs import (
-    parse_radius_acct_log,
-    parse_radius_auth_log,
+from collections.abc import Sequence
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+from scb.telemetry.accounting_reconcile import (
+    AccountingReconciliation,
+    reconcile_accounting_counters,
 )
+from scb.telemetry.parse_openwrt_metrics import parse_openwrt_metrics
+from scb.telemetry.parse_radius_logs import parse_radius_acct_log, parse_radius_auth_log
 from scb.telemetry.parse_tc_stats import parse_tc_stats
 from scb.telemetry.parse_wireguard_stats import parse_wireguard_stats
-from scb.telemetry.sample_processing import (
-    main,
-    parse_all_samples,
-    parse_sample_file,
-)
 from scb.telemetry.schemas import (
     BaseTelemetryRecord,
     EvidenceClass,
@@ -27,7 +24,52 @@ from scb.telemetry.schemas import (
     WireGuardStatsRecord,
 )
 
+if TYPE_CHECKING:
+    from scb.telemetry.sample_processing import ParsedTable
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Lazily invoke the sample-processing command."""
+
+    from scb.telemetry.sample_processing import main as implementation
+
+    return implementation(argv)
+
+
+def parse_all_samples(
+    samples_dir: Path,
+    output_dir: Path,
+    *,
+    parsed_at: str | None = None,
+    repo_root: Path | None = None,
+) -> list[ParsedTable]:
+    """Lazily parse a directory without importing the CLI during package load."""
+
+    from scb.telemetry.sample_processing import parse_all_samples as implementation
+
+    return implementation(
+        samples_dir,
+        output_dir,
+        parsed_at=parsed_at,
+        repo_root=repo_root,
+    )
+
+
+def parse_sample_file(
+    root: Path,
+    path: Path,
+    *,
+    parsed_at: str | None = None,
+) -> ParsedTable:
+    """Lazily parse one supported telemetry source."""
+
+    from scb.telemetry.sample_processing import parse_sample_file as implementation
+
+    return implementation(root, path, parsed_at=parsed_at)
+
+
 __all__ = [
+    "AccountingReconciliation",
     "BaseTelemetryRecord",
     "EvidenceClass",
     "OpenWrtMetricRecord",
@@ -43,4 +85,5 @@ __all__ = [
     "parse_sample_file",
     "parse_tc_stats",
     "parse_wireguard_stats",
+    "reconcile_accounting_counters",
 ]

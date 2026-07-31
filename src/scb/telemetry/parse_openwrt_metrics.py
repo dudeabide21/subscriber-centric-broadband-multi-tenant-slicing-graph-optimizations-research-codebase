@@ -1,19 +1,19 @@
-"""Parse synthetic OpenWrt CPU/RAM/IRQ metrics.
-
-Synthetic format:
-
-    <ISO-timestamp> ap_id=<id> cpu_percent=<float>
-        ram_used_mb=<float> ram_total_mb=<float>
-        irq_rate=<float> load_avg=<float>
-
-The parser is strict: a missing field causes a parse error rather than a
-silent zero.
-"""
+"""Parse strict OpenWrt CPU, memory, interrupt, and load telemetry."""
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 
+from scb.telemetry.parser_common import (
+    finite_float,
+    iter_data_lines,
+    parse_strict_key_values,
+    read_utf8_text,
+    repository_relative_source,
+    require_records,
+    validate_aware_timestamp,
+)
 from scb.telemetry.schemas import EvidenceClass, OpenWrtMetricRecord
 
 _REQUIRED_KEYS = {
@@ -26,82 +26,62 @@ _REQUIRED_KEYS = {
 }
 
 
-def _iter_lines(text: str) -> list[list[str]]:
-    out: list[list[str]] = []
-    for raw in text.splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        out.append(line.split())
-    return out
-
-
-def _parse_key_values(tokens: list[str], record: OpenWrtMetricRecord) -> None:
-    found: set[str] = set()
-    for token in tokens:
-        if "=" not in token:
-            continue
-        key, raw = token.split("=", 1)
-        key = key.strip()
-        value = raw.strip()
-        found.add(key)
-        if key == "ap_id":
-            record.ap_id = value
-        elif key == "cpu_percent":
-            record.cpu_percent = float(value)
-        elif key == "ram_used_mb":
-            record.ram_used_mb = float(value)
-        elif key == "ram_total_mb":
-            record.ram_total_mb = float(value)
-        elif key == "irq_rate":
-            record.irq_rate = float(value)
-        elif key == "load_avg":
-            record.load_avg = float(value)
-    missing = _REQUIRED_KEYS - found
-    if missing:
-        raise ValueError(f"missing openwrt metric keys: {sorted(missing)}")
-
-
 def parse_openwrt_metrics(
     path: Path,
     repo_root: Path,
     parser_version: str,
     evidence_class: EvidenceClass = EvidenceClass.SYNTHETIC,
+    *,
+    parsed_at: str | None = None,
 ) -> list[OpenWrtMetricRecord]:
-    """Parse a synthetic OpenWrt metrics file.
+    """Parse complete metric snapshots and reject impossible values."""
 
-    Args:
-        path: Path to the file.
-        repo_root: Repository root used to compute the relative source path.
-        parser_version: Parser version stamp.
-        evidence_class: Defaults to :attr:`EvidenceClass.SYNTHETIC`.
-
-    Returns:
-        A list of :class:`OpenWrtMetricRecord` objects.
-
-    Raises:
-        ValueError: If a line is malformed or required keys are missing.
-    """
-
-    text = path.read_text(encoding="utf-8")
+    source_file = repository_relative_source(path, repo_root)
+    parse_time = parsed_at or datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    validate_aware_timestamp(parse_time, field="parsed_at")
     records: list[OpenWrtMetricRecord] = []
-    for tokens in _iter_lines(text):
-        if len(tokens) < 1:
-            raise ValueError("invalid openwrt metrics line")
-        timestamp = tokens[0]
-        record = OpenWrtMetricRecord(
-            evidence_class=evidence_class,
-            source_file=path.relative_to(repo_root).as_posix(),
-            source_type="openwrt_metrics",
-            parser_version=parser_version,
-            timestamp=timestamp,
-            ap_id="",
-            cpu_percent=0.0,
-            ram_used_mb=0.0,
-            ram_total_mb=0.0,
-            irq_rate=0.0,
-            load_avg=0.0,
+    for line_number, line in iter_data_lines(read_utf8_text(path)):
+        tokens = line.split()
+        if len(tokens) < 2:
+            raise ValueError(f"OpenWrt line {line_number}: missing metric fields")
+        timestamp, *fields = tokens
+        validate_aware_timestamp(
+            timestamp, field=f"OpenWrt line {line_number} timestamp"
         )
-        _parse_key_values(tokens[1:], record)
-        records.append(record)
-    return records
+        context = f"OpenWrt line {line_number}"
+        values = parse_strict_key_values(
+            fields,
+            allowed_keys=_REQUIRED_KEYS,
+            required_keys=_REQUIRED_KEYS,
+            context=context,
+        )
+        cpu_percent = finite_float(
+            values["cpu_percent"], field=f"{context} cpu_percent", maximum=100.0
+        )
+        ram_used_mb = finite_float(
+            values["ram_used_mb"], field=f"{context} ram_used_mb"
+        )
+        ram_total_mb = finite_float(
+            values["ram_total_mb"],
+            field=f"{context} ram_total_mb",
+            exclusive_minimum=True,
+        )
+        if ram_used_mb > ram_total_mb:
+            raise ValueError(f"{context}: ram_used_mb exceeds ram_total_mb")
+        records.append(
+            OpenWrtMetricRecord(
+                evidence_class=evidence_class,
+                source_file=source_file,
+                source_type="openwrt_metrics",
+                parser_version=parser_version,
+                parsed_at=parse_time,
+                timestamp=timestamp,
+                ap_id=values["ap_id"],
+                cpu_percent=cpu_percent,
+                ram_used_mb=ram_used_mb,
+                ram_total_mb=ram_total_mb,
+                irq_rate=finite_float(values["irq_rate"], field=f"{context} irq_rate"),
+                load_avg=finite_float(values["load_avg"], field=f"{context} load_avg"),
+            )
+        )
+    return require_records(records, context="OpenWrt metrics")
