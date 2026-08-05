@@ -23,3 +23,4 @@ htmlcov/
 data/test_processed/
 .agents/
 .claude/
+paper/latex/Test_Build
