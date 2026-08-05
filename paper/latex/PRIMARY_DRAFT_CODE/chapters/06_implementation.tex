@@ -1,15 +1,12 @@
 %% ============================================================
 %%  Chapter 6 - Implementation Blueprints and Algorithms
 %% ============================================================
-\chapter{Implementation Blueprints and Core Algorithms}
-\label{ch:impl}
+\chapter{Implementation Blueprints and Core Algorithms}\label{ch:impl}
 
-\section{Authentication and Slice Assignment}
-\label{sec:alg-auth}
+\section{Authentication and Slice Assignment}\label{sec:alg-auth}
 
 \begin{algorithm}[H]
-  \caption{Safety-Constrained Subscriber Authentication and Slice Assignment}
-  \label{alg:auth-slice}
+  \caption{Safety-Constrained Subscriber Authentication and Slice Assignment}\label{alg:auth-slice}
   \KwData{Subscriber request $Req_i$, visited AP $a_j$, home domain $d_i$, policy database $\mathcal{P}$}
   \KwResult{Access decision, slice assignment, accounting state}
   Receive 802.1X/EAPOL association request from device $s_i$\;
@@ -28,7 +25,8 @@
     }{
       \Return{Access-Reject with policy/capacity/resource failure reason}\;
     }
-  }{
+  }
+  {
     \Return{Access-Reject with EAP failure reason}\;
   }
 \end{algorithm}
